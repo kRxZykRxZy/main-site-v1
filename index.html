@@ -11,7 +11,7 @@
     <script src="sweetalert2.all.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyScratchBlocks - A Scratch & TurboWarp Modification</title>
+    <title>SnapLabs - A Scratch & TurboWarp Modification</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom font import for Inter */
@@ -45,7 +45,7 @@
     <header class="bg-white shadow-sm py-4">
         <div class="container mx-auto px-4 flex justify-between items-center">
             <a href="/" class="flex items-center space-x-2 text-2xl font-bold text-indigo-600">
-                <span>MyScratchBlocks</span>
+                <span>SnapLabs</span>
             </a>
 
             <nav class="hidden md:flex space-x-6">
@@ -91,7 +91,7 @@
     <section id="featured-projects" class="py-16 px-4 bg-gray-100">
         <div class="container mx-auto max-w-6xl text-center">
             <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-gray-800">Featured Projects</h2>
-            <p class="text-lg text-gray-600 mb-8">Discover top projects hand-picked by the MyScratchBlocks community admins.</p>
+            <p class="text-lg text-gray-600 mb-8">Discover top projects hand-picked by the SnapLabs community admins.</p>
             <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <p id="projects-loading" class="text-center text-gray-600 col-span-full">Loading featured projects... <span class="loading-spinner"></span></p>
                 <p id="projects-error" class="text-center text-red-500 col-span-full hidden">Failed to load projects. Please try again later.</p>
@@ -108,7 +108,7 @@
         <div class="container mx-auto max-w-4xl text-center">
             <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-gray-800">Ready to Create or Connect?</h2>
             <p class="text-lg text-gray-600 mb-10">
-                MyScratchBlocks is your platform to build incredible things and join a vibrant community.
+                SnapLabs is your platform to build incredible things and join a vibrant community.
             </p>
             <div class="flex flex-wrap justify-center gap-6">
                 <a href="/editor/" class="bg-indigo-600 text-white hover:bg-indigo-700 font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-3">
@@ -117,7 +117,7 @@
                     </svg>
                     <span>Create A Project</span>
                 </a>
-                <a href="https://github.com/MyScratchBlocks" class="bg-gray-800 text-white hover:bg-gray-700 font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-3">
+                <a href="https://github.com/SnapLabsFoundation" class="bg-gray-800 text-white hover:bg-gray-700 font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-3">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.6.111.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.838 1.238 1.838 1.238 1.07 1.835 2.809 1.305 3.49.998.108-.775.419-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.381 1.236-3.22-.124-.3-.536-1.52.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.046.138 3.003.404 2.293-1.552 3.3-1.23 3.3-1.23.653 1.656.241 2.876.118 3.176.77.839 1.233 1.909 1.233 3.22 0 4.61-2.809 5.625-5.478 5.922.43.369.812 1.101.812 2.222 0 1.606-.015 2.895-.015 3.286 0 .318.219.695.827.576C20.562 21.807 24 17.307 24 12 24 5.373 18.627 0 12 0z"/>
                     </svg>
@@ -144,7 +144,7 @@
             <div class="flex justify-center space-x-6">
                 <a href="/privacy-policy" class="text-gray-400 hover:text-white transition-colors duration-200">Privacy Policy</a>
                 <a href="https://scratch.mit.edu/community_guidelines" class="text-gray-400 hover:text-white transition-colors duration-200">Terms of Service</a>
-                <a href="https://scratch.mit.edu/users/MyScratchedAccount/" class="text-gray-400 hover:text-white transition-colors duration-200">Contact Us</a>
+                <a href="https://scratch.mit.edu/users/kRxZy_kRxZy/" class="text-gray-400 hover:text-white transition-colors duration-200">Contact Us</a>
             </div>
         </div>
     </footer>
@@ -208,7 +208,7 @@ function escapeHTML(str) {
                 projectsContainer.innerHTML = '';
 
                 // Using the corsproxy.io to bypass CORS issues for the given API
-                const PROJECTS_API_URL = 'https://corsproxy.io/?url=https://editor-compiler.onrender.com/api/projects';
+                const PROJECTS_API_URL = 'https://corsproxy.io/?url=https://sl-api-v1.onrender.com/api/projects';
 
                 try {
                     const response = await fetch(PROJECTS_API_URL);
@@ -230,7 +230,7 @@ function escapeHTML(str) {
 
                         if (id) {
                             try {
-                                const res = await fetch(`https://corsproxy.io/?url=https://editor-compiler.onrender.com/api/projects/${id}/meta/${localStorage.getItem('username') || 'test'}`);
+                                const res = await fetch(`https://corsproxy.io/?url=https://sl-api-v1.onrender.com/api/projects/${id}/meta/${localStorage.getItem('username') || 'test'}`);
                                 if (res.ok) {
                                     const jsonData = await res.json();
                                 }
@@ -240,7 +240,7 @@ function escapeHTML(str) {
                         }
 
                         projectCard.innerHTML = `
-                            <img src="https://editor-compiler.onrender.com${escapeHTML(project.image) || '/images/No%20Cover%20Available.png'}" alt="${escapeHTML(project.name)} thumbnail" class="w-full h-40 object-cover rounded-md mb-4" onerror="this.onerror=null;this.src='/images/No%20Cover%20Available.png';"/>
+                            <img src="https://sl-api-v1.onrender.com${escapeHTML(project.image) || '/images/No%20Cover%20Available.png'}" alt="${escapeHTML(project.name)} thumbnail" class="w-full h-40 object-cover rounded-md mb-4" onerror="this.onerror=null;this.src='/images/No%20Cover%20Available.png';"/>
                             <h3 class="text-xl font-semibold text-gray-700 mb-2">${escapeHTML(project.name)}</h3>
                             <p class="text-gray-600 text-sm mb-4">Author: ${author}</p>
                             <a href="${project.link}" class="text-indigo-600 hover:text-indigo-800 font-medium inline-flex items-center">
