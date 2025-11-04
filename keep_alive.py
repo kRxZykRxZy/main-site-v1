@@ -7,14 +7,12 @@ import os, base64, requests, zipfile
 from projects import register_routes
 from editor import register
 from users import register_login
-from the_scratch_channel import register_articles
 
 app = Flask(__name__)
 CORS(app)
 register_routes(app)
 register(app)
 register_login(app)
-register_articles(app)
 app.secret_key = 'a9f3d7c0e1b24f6d9e8a5c3b7f1d2e0c'
 GITHUB_USER = 'MyScratchBlocks'
 REPO_NAME = 'Project-DB'
