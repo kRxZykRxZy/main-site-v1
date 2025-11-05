@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MyScratchBlocks - Coding Editor</title>
+  <title>SnapLabs - Coding Editor</title>
   <style>
     html, body {
       margin: 0;
@@ -41,7 +41,7 @@
       const remix = params.get('remix');
 
       if(remix && username) {
-        const res = await fetch(`https://editor-compiler.onrender.com/remix/${remix}`, {
+        const res = await fetch(`https://sl-api-v1.onrender.com/remix/${remix}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -57,7 +57,7 @@
       // If no hash and both username and sb3 exist, try to share the
       if (idVal && username && !remix) {
         try {
-          const response = await fetch('https://editor-compiler.onrender.com/', {
+          const response = await fetch('https://sl-api-v1.onrender.com/', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -68,7 +68,7 @@
           const res = await response.json();
 
           if (res?.id) {
-            window.location.href = `https://myscratchblocks.github.io/projects#${res.id}`;
+            window.location.href = `/projects#${res.id}`;
             localStorage.setItem('new-project', 'true');
             return; // Page will reload
           } else {
@@ -81,7 +81,7 @@
 
       // Load editor in iframe
       const hash = idVal;
-      const baseUrl = "https://myscratchblocks.ddns.net/scratch-gui/editor";
+      const baseUrl = "https://myscratchblocks.github.io/scratch-gui/editor";
       const finalUrl = hash ? `${baseUrl}#${hash}` : baseUrl;
       document.getElementById("scratchFrame").src = finalUrl;
 
@@ -118,7 +118,7 @@
 
     const iframe = document.getElementById('scratchFrame');
     const iframeSrc = iframe.getAttribute('src');
-    const expectedSrc = `https://myscratchblocks.github.io/editor/#${idVal}`;
+    const expectedSrc = `/editor/#${idVal}`;
     if (iframeSrc !== expectedSrc) {
       window.pid = idVal;
       window.location.href = `projects/${window.pid}`;
