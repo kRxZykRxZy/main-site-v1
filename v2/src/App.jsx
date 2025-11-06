@@ -3,8 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainPage from "./pages/MainPage";
 import EditorPageWrapper from "./pages/EditorPage";
 import ProjectPage from "./pages/ProjectPage";
+import SnapLabsAuth from "./pages/SiteAuth";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import "./firebaseConfig"; // make sure this initializes Firebase
+import "./firebaseConfig"; 
 
 const App = () => {
   const [username, setUsername] = useState(null);
@@ -28,7 +29,10 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<MainPage username={username} />} />
+        <Route 
+          path="/" 
+          element={<MainPage username={username} />}
+        />
         <Route
           path="/projects/:id/editor"
           element={<EditorPageWrapper username={username} />}
@@ -36,6 +40,10 @@ const App = () => {
         <Route
           path="/projects/:id"
           element={<ProjectPage username={username} />}
+        />
+        <Route 
+          path="/account" 
+          element={<SiteAuth />} 
         />
         <Route
           path="*"
