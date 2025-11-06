@@ -3,28 +3,26 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainPage from "./pages/MainPage";
 import EditorPageWrapper from "./pages/EditorPage";
 import ProjectPage from "./pages/ProjectPage";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import "./firebaseConfig"; // make sure this initializes Firebase
 
 const App = () => {
   const [username, setUsername] = useState(null);
 
   useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const res = await fetch("https://sl-api-v1.onrender.com/session", {
-          method: "GET",
-          credentials: "include", // send cookies for auth
-        });
-
-        if (!res.ok) throw new Error("Failed to fetch session");
-        const data = await res.json();
-        setUsername(data.username || null);
-      } catch (err) {
-        console.error("Session fetch error:", err);
+    const auth = getAuth();
+    // Listen to auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // You can get displayName, email, uid, etc.
+        setUsername(user.displayName || user.email || null);
+      } else {
         setUsername(null);
       }
-    };
+    });
 
-    fetchSession();
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
   return (
