@@ -117,10 +117,10 @@ class MainPage extends Component {
 
   render() {
     const { username } = this.state;
+    window.username = username;
 
     return (
       <div className="antialiased font-inter bg-gray-50 text-gray-800">
-        <MenuBar username={username} />
 
         {/* Homepage Intro */}
         <section
