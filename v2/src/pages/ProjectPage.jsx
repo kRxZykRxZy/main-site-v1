@@ -171,12 +171,12 @@ const ProjectPage = ({ username: propUsername }) => {
 
   return (
     <div className="container mx-auto p-4">
-      <MenuBar username={currentUsername} />
       {loadingMeta ? (
         <p>Loading project...</p>
       ) : (
         <div>
           <h1 className="text-3xl font-bold">{projectMeta?.title || "Untitled Project"}</h1>
+          <iframe src={"https://myscratchblocks.github.io/scratch-gui/embed#" + projectId} />
           <p className="mt-2 text-gray-700">{projectMeta?.description || "No description."}</p>
           <p className="mt-1 text-sm text-gray-500">By {projectMeta?.author?.username || "Unknown"}</p>
 
