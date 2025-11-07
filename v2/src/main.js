@@ -9,4 +9,4 @@ const rootElement = document.getElementById("root");
 const root = createRoot(rootElement);
 
 // Render the App component
-root.render(<App />);
+root.render(App);
