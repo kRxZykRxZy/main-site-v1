@@ -3,36 +3,39 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainPage from "./pages/MainPage";
 import EditorPageWrapper from "./pages/EditorPage";
 import ProjectPage from "./pages/ProjectPage";
-import SnapLabsAuth from "./pages/SiteAuth";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import "./firebaseConfig"; 
+import SiteAuth from "./pages/SiteAuth"; // renamed to match convention
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebaseConfig"; // import from your firebase setup
 
 const App = () => {
   const [username, setUsername] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const auth = getAuth();
-    // Listen to auth state changes
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        // You can get displayName, email, uid, etc.
         setUsername(user.displayName || user.email || null);
       } else {
         setUsername(null);
       }
+      setLoading(false);
     });
 
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen text-xl">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <Router>
       <Routes>
-        <Route 
-          path="/" 
-          element={<MainPage username={username} />}
-        />
+        <Route path="/" element={<MainPage username={username} />} />
         <Route
           path="/projects/:id/editor"
           element={<EditorPageWrapper username={username} />}
@@ -41,10 +44,7 @@ const App = () => {
           path="/projects/:id"
           element={<ProjectPage username={username} />}
         />
-        <Route 
-          path="/account" 
-          element={<SiteAuth />} 
-        />
+        <Route path="/account" element={<SiteAuth />} />
         <Route
           path="*"
           element={
