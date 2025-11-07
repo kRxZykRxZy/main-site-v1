@@ -8,7 +8,7 @@ import {
   updateProfile,
   onAuthStateChanged,
 } from "firebase/auth";
-import "../firebaseConfig"; 
+import { auth } from "../firebaseConfig"; 
 
 const SnapLabsAuth = () => {
   const [username, setUsername] = useState("");
@@ -16,8 +16,6 @@ const SnapLabsAuth = () => {
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
-
-  const auth = getAuth();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
