@@ -43,7 +43,7 @@
     <div id="root"></div>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8 px-4 rounded-t-lg shadow-inner mt-16">
+    <footer id="snapfooter" class="bg-gray-800 text-white py-8 px-4 rounded-t-lg shadow-inner mt-16">
       <div class="container mx-auto text-center">
         <p class="text-sm mb-4">&copy; 2025 SnapLabs. All rights reserved.</p>
         <div class="flex justify-center space-x-6">
@@ -69,6 +69,12 @@
       </div>
     </footer>
 
+    <script>
+      const footer = document.getElementById('snapfooter');
+      if (window.location.href.includes('editor')) {
+        footer.style.display == 'none';
+      } 
+    </script>
     <!-- React Scripts -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
