@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebaseConfig";
@@ -15,6 +15,7 @@ class EditorPage extends React.Component {
     this.iframeRef = React.createRef();
     this.state = {
       redirect: null,
+      username: null,
     };
   }
 
@@ -24,17 +25,24 @@ class EditorPage extends React.Component {
 
   async init() {
     const { id } = this.props;
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const usernameT = user.displayName || user.email || null;
-      } else {
-        const usernameT = null
-      }
-      return usernameT;
+
+    // Wait for Firebase auth state to resolve
+    const username = await new Promise((resolve) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        unsubscribe(); // stop listening once we have the user
+        if (user) {
+          resolve(user.displayName || user.email || null);
+        } else {
+          resolve(null);
+        }
+      });
     });
-    const username = unsubscribe();
+
+    this.setState({ username });
+
     const SECURE_ID = localStorage.getItem("SECURE_ID");
 
+    // Redirect if no username and no project id
     if (!username && id == 0) {
       this.setState({ redirect: "/account" });
       return;
@@ -43,16 +51,14 @@ class EditorPage extends React.Component {
     const params = new URLSearchParams(window.location.search);
     const remix = params.get("remix");
 
+    // Remix project flow
     if (remix && username) {
       try {
-        const res = await fetch(
-          `https://sl-api-v1.onrender.com/remix/${remix}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ remixId: remix, username }),
-          }
-        );
+        const res = await fetch(`https://sl-api-v1.onrender.com/remix/${remix}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ remixId: remix, username }),
+        });
         const json = await res.json();
         this.setState({ redirect: `/projects/${json.id}` });
         return;
@@ -61,6 +67,7 @@ class EditorPage extends React.Component {
       }
     }
 
+    // New project flow
     if (id == 0 && username && !remix) {
       try {
         const res = await fetch("https://sl-api-v1.onrender.com/", {
@@ -75,14 +82,15 @@ class EditorPage extends React.Component {
           return;
         }
       } catch (err) {
-        console.error("Error sharing project:", err);
+        console.error("Error creating new project:", err);
       }
     }
 
     // Set iframe src
     const hash = id || "0";
     const baseUrl = "https://Myscratchblocks.github.io/scratch-gui/editor";
-    const finalUrl = hash ? `${baseUrl}#${hash}` : baseUrl;
+    const finalUrl = `${baseUrl}#${hash}`;
+
     if (this.iframeRef.current) {
       this.iframeRef.current.src = finalUrl;
     }
