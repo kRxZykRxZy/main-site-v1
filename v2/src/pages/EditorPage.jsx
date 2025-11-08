@@ -22,7 +22,7 @@ class EditorPage extends React.Component {
 
   async init() {
     const { id } = this.props;
-    const username = window.usernamw;
+    const username = window.username;
     const SECURE_ID = localStorage.getItem("SECURE_ID");
 
     if (!username && id == 0) {
@@ -44,7 +44,7 @@ class EditorPage extends React.Component {
           }
         );
         const json = await res.json();
-        this.setState({ redirect: `/projects#${json.id}` });
+        this.setState({ redirect: `/projects/${json.id}` });
         return;
       } catch (err) {
         console.error("Remix error:", err);
@@ -71,7 +71,7 @@ class EditorPage extends React.Component {
 
     // Set iframe src
     const hash = id || "0";
-    const baseUrl = "https://MyScratchBlocks.ddns.net/scratch-gui/editor";
+    const baseUrl = "https://Myscratchblocks.github.io/scratch-gui/editor";
     const finalUrl = hash ? `${baseUrl}#${hash}` : baseUrl;
     if (this.iframeRef.current) {
       this.iframeRef.current.src = finalUrl;
