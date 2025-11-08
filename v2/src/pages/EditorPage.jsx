@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from ". ./firebaseConfig";
 
 // Wrapper to pass `id` from params to class component
 export default function EditorPageWrapper() {
@@ -22,7 +24,15 @@ class EditorPage extends React.Component {
 
   async init() {
     const { id } = this.props;
-    const username = window.username;
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const usernameT = user.displayName || user.email || null;
+      } else {
+        const usernameT = null
+      }
+      return usernameT;
+    });
+    const username = unsubscribe();
     const SECURE_ID = localStorage.getItem("SECURE_ID");
 
     if (!username && id == 0) {
