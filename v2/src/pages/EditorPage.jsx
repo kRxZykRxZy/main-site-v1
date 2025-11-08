@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from ". ./firebaseConfig";
+import { auth } from "../firebaseConfig";
 
 // Wrapper to pass `id` from params to class component
 export default function EditorPageWrapper() {
