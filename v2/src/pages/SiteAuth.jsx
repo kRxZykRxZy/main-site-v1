@@ -19,7 +19,7 @@ const SnapLabsAuth = () => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        window.username = currentUser;
+        window.username = currentUser.displayName;
       } else {
         setUser(null);
       }
@@ -36,6 +36,7 @@ const SnapLabsAuth = () => {
     try {
       const res = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(res.user, { displayName: username });
+      window.username = username;
       setUser(res.user);
     } catch (err) {
       setError(err.message);
@@ -51,6 +52,7 @@ const SnapLabsAuth = () => {
     try {
       const res = await signInWithEmailAndPassword(auth, email, password);
       setUser(res.user);
+      window.username = username
     } catch (err) {
       setError(err.message);
     }
@@ -77,7 +79,7 @@ const SnapLabsAuth = () => {
             {error && <p className="text-red-600 mb-4">{error}</p>}
 
             <label className="block mb-1 text-sm font-medium text-gray-700">
-              Username
+              Username (Not Required For Login) 
             </label>
             <input
               type="text"
