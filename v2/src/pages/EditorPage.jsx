@@ -22,10 +22,10 @@ class EditorPage extends React.Component {
 
   async init() {
     const { id } = this.props;
-    const username = localStorage.getItem("username");
+    const username = window.usernamw;
     const SECURE_ID = localStorage.getItem("SECURE_ID");
 
-    if (!SECURE_ID) {
+    if (!username && id == 0) {
       this.setState({ redirect: "/account" });
       return;
     }
@@ -51,7 +51,7 @@ class EditorPage extends React.Component {
       }
     }
 
-    if (id && username && !remix) {
+    if (id == 0 && username && !remix) {
       try {
         const res = await fetch("https://sl-api-v1.onrender.com/", {
           method: "POST",
