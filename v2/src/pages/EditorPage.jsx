@@ -76,12 +76,16 @@ class EditorPage extends React.Component {
           body: JSON.stringify({ username }),
         });
         const data = await res.json();
+        if (data.error || data.message) {
+          alert(data.error || data.message);
+        } 
         if (data?.id) {
           localStorage.setItem("new-project", "true");
           this.setState({ redirect: `/projects/${data.id}` });
           return;
         }
       } catch (err) {
+        alert(err);
         console.error("Error creating new project:", err);
       }
     }
