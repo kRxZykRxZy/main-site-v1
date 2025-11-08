@@ -19,6 +19,7 @@ const SnapLabsAuth = () => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        window.username = currentUser;
       } else {
         setUser(null);
       }
