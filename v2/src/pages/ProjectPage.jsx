@@ -67,21 +67,14 @@ const ProjectPage = ({ username: propUsername }) => {
     }
   };
 
-  const handleTitleChange = (e) => {
-    const value = e.target.value;
-    setTitleInput(value);
-
-    if (saveTimeout.current) clearTimeout(saveTimeout.current);
-    saveTimeout.current = setTimeout(() => saveMeta(value, descriptionInput), 800);
-  };
-
-  const handleDescriptionChange = (e) => {
-    const value = e.target.value;
-    setDescriptionInput(value);
-
-    if (saveTimeout.current) clearTimeout(saveTimeout.current);
-    saveTimeout.current = setTimeout(() => saveMeta(titleInput, value), 800);
-  };
+  // Auto-save whenever title or description changes (debounced)
+  useEffect(() => {
+    if (!isAuthor) return;
+    const timeout = setTimeout(() => {
+      saveMeta(titleInput, descriptionInput);
+    }, 800);
+    return () => clearTimeout(timeout);
+  }, [titleInput, descriptionInput]);
 
   /** --- Thumbnail Upload --- **/
   const handleThumbnailChange = async (e) => {
@@ -127,11 +120,14 @@ const ProjectPage = ({ username: propUsername }) => {
   const postReply = async (commentId, text) => {
     if (!currentUsername || !text.trim()) return;
     try {
-      const res = await fetch(`${BASE_URL}/api/projects/${projectId}/comments/${commentId}/reply`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, user: { username: currentUsername } }),
-      });
+      const res = await fetch(
+        `${BASE_URL}/api/projects/${projectId}/comments/${commentId}/reply`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, user: { username: currentUsername } }),
+        }
+      );
       if (res.ok) await fetchComments();
     } catch (err) {
       console.error(err);
@@ -142,9 +138,10 @@ const ProjectPage = ({ username: propUsername }) => {
   const handleAction = async (action) => {
     if (!currentUsername) return alert(`Log in to ${action} this project`);
     try {
-      const res = await fetch(`${BASE_URL}/api/projects/${projectId}/${action}/${currentUsername}`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `${BASE_URL}/api/projects/${projectId}/${action}/${currentUsername}`,
+        { method: "POST" }
+      );
       if (res.ok) await fetchMeta();
     } catch (err) {
       console.error(err);
@@ -194,10 +191,15 @@ const ProjectPage = ({ username: propUsername }) => {
     };
 
     return (
-      <div style={{ marginLeft: depth * 24 }} className="comment-item bg-gray-100 p-3 rounded mb-2">
+      <div
+        style={{ marginLeft: depth * 24 }}
+        className="comment-item bg-gray-100 p-3 rounded mb-2"
+      >
         <div className="flex justify-between text-sm text-gray-600 mb-1">
           <span className="font-semibold text-blue-700">{comment.user}</span>
-          <span className="text-gray-500">{new Date(comment.createdAt).toLocaleString()}</span>
+          <span className="text-gray-500">
+            {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""}
+          </span>
         </div>
         <div className="text-gray-800">{comment.text}</div>
         {currentUsername && (
@@ -217,7 +219,10 @@ const ProjectPage = ({ username: propUsername }) => {
               placeholder="Write your reply..."
               required
             />
-            <button type="submit" className="mt-1 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+            <button
+              type="submit"
+              className="mt-1 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
               Post Reply
             </button>
           </form>
@@ -229,106 +234,137 @@ const ProjectPage = ({ username: propUsername }) => {
     );
   };
 
+  /** --- Initial Fetch --- **/
   useEffect(() => {
     fetchMeta();
     fetchComments();
 
     if (currentUsername) {
-      fetch(`${BASE_URL}/api/${projectId}/views/${currentUsername}`, { method: "POST" }).catch(console.error);
+      fetch(`${BASE_URL}/api/${projectId}/views/${currentUsername}`, { method: "POST" }).catch(
+        console.error
+      );
     }
   }, [projectId, currentUsername]);
 
+  /** --- Loading State --- **/
   if (loadingMeta || !projectMeta) return <p>Loading project...</p>;
 
   return (
     <div className="container mx-auto p-4">
-      {loadingMeta ? (
-        <p>Loading project...</p>
+      {/* Title */}
+      {isAuthor ? (
+        <input
+          value={titleInput}
+          onChange={(e) => setTitleInput(e.target.value)}
+          className="w-full text-3xl font-bold border-b-2 border-gray-300 mb-2 p-1"
+        />
       ) : (
-        <div>
-          {/* Title input only for author */}
-          {isAuthor ? (
-            <input
-              value={titleInput}
-              onChange={handleTitleChange}
-              className="w-full text-3xl font-bold border-b-2 border-gray-300 mb-2 p-1"
-            />
-          ) : (
-            <h1 className="text-3xl font-bold mb-2">{projectMeta.title}</h1>
+        <h1 className="text-3xl font-bold mb-2">{projectMeta.title}</h1>
+      )}
+
+      {/* Description */}
+      {isAuthor ? (
+        <textarea
+          value={descriptionInput}
+          onChange={(e) => setDescriptionInput(e.target.value)}
+          className="w-full p-2 border rounded mb-2"
+          placeholder="Project description..."
+        />
+      ) : (
+        <p className="text-gray-700 mb-2">{projectMeta.description}</p>
+      )}
+
+      <p className="mt-1 text-sm text-gray-500">
+        By {projectMeta.author?.username || "Unknown"}
+      </p>
+
+      {/* Thumbnail upload */}
+      {isAuthor && (
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Project Thumbnail:
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleThumbnailChange}
+            disabled={uploadingThumbnail}
+          />
+          {uploadingThumbnail && (
+            <span className="ml-2 text-gray-500">Uploading...</span>
           )}
-
-          {/* Description editable only for author */}
-          {isAuthor ? (
-            <textarea
-              value={descriptionInput}
-              onChange={handleDescriptionChange}
-              className="w-full p-2 border rounded mb-2"
-              placeholder="Project description..."
-            />
-          ) : (
-            <p className="text-gray-700 mb-2">{projectMeta.description}</p>
-          )}
-
-          <p className="mt-1 text-sm text-gray-500">By {projectMeta.author?.username || "Unknown"}</p>
-
-          {/* Thumbnail upload only for author */}
-          {isAuthor && (
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Project Thumbnail:</label>
-              <input type="file" accept="image/*" onChange={handleThumbnailChange} disabled={uploadingThumbnail} />
-              {uploadingThumbnail && <span className="ml-2 text-gray-500">Uploading...</span>}
-            </div>
-          )}
-
-          {/* Scratch project iframe */}
-          {!loadingMeta && projectMeta && (
-            <div className="mt-4 flex justify-center">
-              <div className="w-[80vw] max-w-[1200px] aspect-[4/3] shadow-lg rounded-lg overflow-hidden" style={{ minHeight: "360px" }}>
-                <iframe
-                  src={`https://myscratchblocks.github.io/scratch-gui/embed#${projectId}?username=${currentUsername}`}
-                  className="w-full h-full"
-                  frameBorder="0"
-                  allowFullScreen
-                  title={projectMeta.title || "Scratch Project"}
-                />
-              </div>
-            </div>
-          )} 
-
-          {/* Project actions */}
-          <div className="flex space-x-3 mt-3 flex-wrap">
-            <button onClick={() => handleAction("love")} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-              ❤️ {projectMeta.stats?.loves || 0}
-            </button>
-            <button onClick={() => handleAction("favourite")} className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600">
-              ⭐ {projectMeta.stats?.favorites || 0}
-            </button>
-            <button onClick={handleRemix} className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">
-              Remix
-            </button>
-            <button onClick={handleSeeInside} className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
-              See Inside
-            </button>
-            {isAuthor && (
-              <>
-                <button onClick={handleShare} className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600">
-                  Share
-                </button>
-                <button onClick={handleUnshare} className="px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-800">
-                  Unshare
-                </button>
-              </>
-            )}
-          </div>
         </div>
       )}
+
+      {/* Scratch project iframe */}
+      <div
+        className="mt-4 flex justify-center"
+        style={{ minHeight: "360px" }}
+      >
+        <div className="w-[80vw] max-w-[1200px] aspect-[4/3] shadow-lg rounded-lg overflow-hidden">
+          <iframe
+            src={`https://myscratchblocks.github.io/scratch-gui/embed#${projectId}?username=${currentUsername}`}
+            className="w-full h-full"
+            frameBorder="0"
+            allowFullScreen
+            title={projectMeta.title || "Scratch Project"}
+          />
+        </div>
+      </div>
+
+      {/* Project actions */}
+      <div className="flex space-x-3 mt-3 flex-wrap">
+        <button
+          onClick={() => handleAction("love")}
+          className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          ❤️ {projectMeta.stats?.loves || 0}
+        </button>
+        <button
+          onClick={() => handleAction("favourite")}
+          className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+        >
+          ⭐ {projectMeta.stats?.favorites || 0}
+        </button>
+        <button
+          onClick={handleRemix}
+          className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+        >
+          Remix
+        </button>
+        <button
+          onClick={handleSeeInside}
+          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          See Inside
+        </button>
+        {isAuthor && (
+          <>
+            <button
+              onClick={handleShare}
+              className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600"
+            >
+              Share
+            </button>
+            <button
+              onClick={handleUnshare}
+              className="px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-800"
+            >
+              Unshare
+            </button>
+          </>
+        )}
+      </div>
 
       {/* Comments Section */}
       <div className="mt-6">
         <h2 className="text-2xl font-semibold mb-2">Comments</h2>
         {currentUsername && (
           <form
-            onSubmit={(e) => { e.preventDefault(); postComment(commentText); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              postComment(commentText);
+            }}
             className="mb-4"
           >
             <textarea
@@ -338,7 +374,10 @@ const ProjectPage = ({ username: propUsername }) => {
               className="w-full p-2 border rounded"
               required
             />
-            <button type="submit" className="mt-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+            <button
+              type="submit"
+              className="mt-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
               Post Comment
             </button>
           </form>
