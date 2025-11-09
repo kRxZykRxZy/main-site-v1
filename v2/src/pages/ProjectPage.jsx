@@ -337,7 +337,7 @@ const ProjectPage = ({ username: propUsername }) => {
       {isAuthor && (
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">
-            Project Thumbnail:
+            Upload Thumbnail
           </label>
           <input
             type="file"
@@ -397,7 +397,7 @@ const ProjectPage = ({ username: propUsername }) => {
         {isAuthor && (
           <>
             {/* Conditional share button based on isShared property (assuming it exists) */}
-            {projectMeta.isShared ? (
+            {projectMeta.visibility == visible ? (
                 <button
                     onClick={handleUnshare}
                     className="px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-800"
