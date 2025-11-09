@@ -14,40 +14,50 @@ const ProjectPage = ({ username: propUsername }) => {
   const [descriptionInput, setDescriptionInput] = useState("");
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [error, setError] = useState(null); // Added state for tracking errors
 
   const currentUsername = propUsername;
   const saveTimeout = useRef(null);
 
+  // Safely determine isAuthor, returns false if projectMeta is null
   const isAuthor = projectMeta?.author?.username === currentUsername;
 
   /** --- Fetch Project Metadata --- **/
   const fetchMeta = async () => {
     setLoadingMeta(true);
+    setError(null); // Clear previous errors
     try {
       const res = await fetch(
         `${BASE_URL}/api/projects/${projectId}/meta/${currentUsername || "guest"}`
       );
+      
+      // Check for non-200 status codes (e.g., 404, 500)
+      if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || `HTTP error! Status: ${res.status}`);
+      }
+
       const data = await res.json();
       setProjectMeta(data);
       setTitleInput(data.title || "");
       setDescriptionInput(data.description || "");
     } catch (err) {
       console.error("Error fetching project meta:", err);
+      setError(err.message || "Failed to load project metadata.");
+      setProjectMeta(null); // Ensure projectMeta is null on error
     } finally {
       setLoadingMeta(false);
     }
   };
 
-  useEffect(() => {
-    fetchMeta();
-  });
   /** --- Fetch Comments --- **/
   const fetchComments = async () => {
     setLoadingComments(true);
     try {
       const res = await fetch(`${BASE_URL}/api/projects/${projectId}/comments`);
       const data = await res.json();
-      setComments(data);
+      // Ensure data is an array before setting state
+      setComments(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error fetching comments:", err);
       setComments([]);
@@ -77,7 +87,7 @@ const ProjectPage = ({ username: propUsername }) => {
       saveMeta(titleInput, descriptionInput);
     }, 800);
     return () => clearTimeout(timeout);
-  }, [titleInput, descriptionInput]);
+  }, [titleInput, descriptionInput, isAuthor]); // Added isAuthor to dependency array
 
   /** --- Thumbnail Upload --- **/
   const handleThumbnailChange = async (e) => {
@@ -89,6 +99,8 @@ const ProjectPage = ({ username: propUsername }) => {
     try {
       const res = await fetch(`${BASE_URL}/api/upload/${projectId}`, {
         method: "POST",
+        // Do not set Content-Type header for FormData, let browser handle it
+        // Assuming your backend expects raw file body, Content-Type is set below:
         headers: { "Content-Type": file.type },
         body: file,
       });
@@ -114,6 +126,8 @@ const ProjectPage = ({ username: propUsername }) => {
       if (res.ok) {
         setCommentText("");
         await fetchComments();
+      } else {
+        console.error("Failed to post comment:", await res.text());
       }
     } catch (err) {
       console.error(err);
@@ -154,7 +168,8 @@ const ProjectPage = ({ username: propUsername }) => {
   /** --- Remix / See Inside --- **/
   const handleRemix = () => {
     if (!currentUsername) return alert("Log in to remix this project");
-    window.location.href = `/projects/0/editor/?remix=${projectId}`;
+    // Ensure the path is correct for your application's routing
+    window.location.href = `/projects/0/editor/?remix=${projectId}`; 
   };
 
   const handleSeeInside = () => {
@@ -184,6 +199,9 @@ const ProjectPage = ({ username: propUsername }) => {
   const CommentItem = ({ comment, depth = 0 }) => {
     const [showReplyForm, setShowReplyForm] = useState(false);
     const [replyText, setReplyText] = useState("");
+    
+    // Safely retrieve username: check if 'user' is an object or fallback to a string
+    const displayUsername = comment.user?.username || comment.user || 'Anonymous';
 
     const handleReplySubmit = async (e) => {
       e.preventDefault();
@@ -199,7 +217,8 @@ const ProjectPage = ({ username: propUsername }) => {
         className="comment-item bg-gray-100 p-3 rounded mb-2"
       >
         <div className="flex justify-between text-sm text-gray-600 mb-1">
-          <span className="font-semibold text-blue-700">{comment.user}</span>
+          {/* FIX: Safely display username */}
+          <span className="font-semibold text-blue-700">{displayUsername}</span>
           <span className="text-gray-500">
             {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""}
           </span>
@@ -230,36 +249,61 @@ const ProjectPage = ({ username: propUsername }) => {
             </button>
           </form>
         )}
-        {comment.replies?.map((rep) => (
+        {/* Check if replies exists and is an array before mapping */}
+        {Array.isArray(comment.replies) && comment.replies.map((rep) => (
           <CommentItem key={rep.id} comment={rep} depth={depth + 1} />
         ))}
       </div>
     );
   };
 
-  /** --- Initial Fetch --- **/
+  /** --- Initial Fetch and View Count --- **/
+  // This useEffect replaces the faulty one and correctly handles initial load
   useEffect(() => {
-    fetchMeta();
-    fetchComments();
+    if (projectId) {
+        fetchMeta();
+        fetchComments();
 
-    if (currentUsername) {
-      fetch(`${BASE_URL}/api/${projectId}/views/${currentUsername}`, { method: "POST" }).catch(
-        console.error
-      );
+        if (currentUsername) {
+            // Post view count (fire and forget)
+            fetch(`${BASE_URL}/api/${projectId}/views/${currentUsername}`, { method: "POST" }).catch(
+                console.error
+            );
+        }
     }
   }, [projectId, currentUsername]);
 
-  /** --- Loading State --- **/
-  if (loadingMeta || !projectMeta) return <p>Loading project...</p>;
-  // Fallback if projectMeta fails
+  /** --- Loading and Error States --- **/
+  if (loadingMeta) {
+      return (
+          <div className="container mx-auto p-4 text-center">
+              <p className="text-xl font-semibold">Loading project...</p>
+          </div>
+      );
+  }
+
+  // FIX: Handle API errors gracefully
+  if (error) {
+      return (
+          <div className="container mx-auto p-4">
+              <h1 className="text-2xl font-bold text-red-600">Error Loading Project</h1>
+              <p className="text-gray-700">A network or server error occurred. Please try again.</p>
+              <p className="text-sm text-gray-500">Details: {error}</p>
+          </div>
+      );
+  }
+  
+  // Fallback if projectMeta is null after loading (e.g., 404)
   if (!projectMeta) {
     return (
       <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold">Project unavailable</h1>
-        <p className="text-gray-700">Could not load project data.</p>
+        <h1 className="text-2xl font-bold">Project Not Found or Unavailable</h1>
+        <p className="text-gray-700">The project data could not be loaded. It may have been deleted.</p>
       </div>
     );
   }
+  
+  // Main Render
   return (
     <div className="container mx-auto p-4">
       {/* Title */}
@@ -314,6 +358,7 @@ const ProjectPage = ({ username: propUsername }) => {
       >
         <div className="w-[80vw] max-w-[1200px] aspect-[4/3] shadow-lg rounded-lg overflow-hidden">
           <iframe
+            // Make sure the iframe source is correct
             src={`https://myscratchblocks.github.io/scratch-gui/embed#${projectId}?username=${currentUsername}`}
             className="w-full h-full"
             frameBorder="0"
@@ -351,18 +396,22 @@ const ProjectPage = ({ username: propUsername }) => {
         </button>
         {isAuthor && (
           <>
-            <button
-              onClick={handleShare}
-              className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600"
-            >
-              Share
-            </button>
-            <button
-              onClick={handleUnshare}
-              className="px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-800"
-            >
-              Unshare
-            </button>
+            {/* Conditional share button based on isShared property (assuming it exists) */}
+            {projectMeta.isShared ? (
+                <button
+                    onClick={handleUnshare}
+                    className="px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-800"
+                >
+                    Unshare
+                </button>
+            ) : (
+                <button
+                    onClick={handleShare}
+                    className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600"
+                >
+                    Share
+                </button>
+            )}
           </>
         )}
       </div>
