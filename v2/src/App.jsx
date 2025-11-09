@@ -4,6 +4,7 @@ import MainPage from "./pages/MainPage";
 import EditorPageWrapper from "./pages/EditorPage";
 import ProjectPage from "./pages/ProjectPage";
 import SiteAuth from "./pages/SiteAuth"; // renamed to match convention
+import Ai from "./pages/AIAssistant";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebaseConfig"; // import from your firebase setup
 
@@ -45,6 +46,7 @@ const App = () => {
           element={<ProjectPage username={username} />}
         />
         <Route path="/account" element={<SiteAuth />} />
+        <Route path="/AI-Assistant" element={<Ai />} />
         <Route
           path="*"
           element={

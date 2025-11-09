@@ -44,7 +44,7 @@ class MenuBar extends React.Component {
               Community Projects
             </a>
             <a
-              href="/AI-Assistant.html"
+              href="/AI-Assistant"
               className="text-gray-600 hover:text-indigo-600 font-medium transition-colors duration-200"
             >
               AI Assistant
@@ -103,7 +103,7 @@ class MenuBar extends React.Component {
                 Community Projects
               </a>
               <a
-                href="/AI-Assistant.html"
+                href="/AI-Assistant"
                 className="block text-gray-600 hover:text-indigo-600 font-medium py-1"
               >
                 AI Assistant
