@@ -77,7 +77,7 @@ class EditorPage extends React.Component {
         });
         const data = await res.json();
         if (data.error || data.message) {
-          alert(data.error || data.message);
+          console.log(data.error || data.message);
         } 
         if (data?.id) {
           localStorage.setItem("new-project", "true");
@@ -93,7 +93,7 @@ class EditorPage extends React.Component {
     // Set iframe src
     const hash = id || "0";
     const baseUrl = "https://Myscratchblocks.github.io/scratch-gui/editor";
-    const finalUrl = `${baseUrl}#${hash}`;
+    const finalUrl = `${baseUrl}#${hash}?username=${username || 'test'}`;
 
     if (this.iframeRef.current) {
       this.iframeRef.current.src = finalUrl;
