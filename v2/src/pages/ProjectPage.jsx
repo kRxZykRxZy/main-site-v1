@@ -397,7 +397,7 @@ const ProjectPage = ({ username: propUsername }) => {
         {isAuthor && (
           <>
             {/* Conditional share button based on isShared property (assuming it exists) */}
-            {projectMeta.visibility == visible ? (
+            {projectMeta.visibility == 'visible' ? (
                 <button
                     onClick={handleUnshare}
                     className="px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-800"
