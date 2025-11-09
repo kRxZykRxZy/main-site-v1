@@ -12,12 +12,13 @@ const ProjectPage = ({ username: propUsername }) => {
   const [loadingComments, setLoadingComments] = useState(true);
   const [commentText, setCommentText] = useState("");
 
+  const currentUsername = propUsername;
   /** --- Fetch Project Metadata --- **/
   const fetchMeta = async () => {
     setLoadingMeta(true);
     try {
       const res = await fetch(
-        `${BASE_URL}/api/projects/${projectId}/meta/${currentUsername || "guest"}`
+        `${BASE_URL}/api/projects/${projectId}/meta/${propUsername || "guest"}`
       );
       const data = await res.json();
       setProjectMeta(data);
@@ -37,6 +38,7 @@ const ProjectPage = ({ username: propUsername }) => {
       setComments(data);
     } catch (err) {
       console.error("Error fetching comments:", err);
+      setComments([]);
     } finally {
       setLoadingComments(false);
     }
@@ -107,7 +109,7 @@ const ProjectPage = ({ username: propUsername }) => {
 
   const handleRemix = () => {
     if (!currentUsername) return alert("Log in to remix this project");
-    window.location.href = `/projects/1/editor/?remix=${projectId}`;
+    window.location.href = `/projects/0/editor/?remix=${projectId}`;
   };
 
   const handleSeeInside = () => {

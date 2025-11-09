@@ -73,7 +73,7 @@ class EditorPage extends React.Component {
         const res = await fetch("https://sl-api-v1.onrender.com/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username }),
+          body: JSON.stringify({ username: username }),
         });
         const data = await res.json();
         if (data.error || data.message) {
