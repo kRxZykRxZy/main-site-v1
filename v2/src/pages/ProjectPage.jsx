@@ -38,7 +38,7 @@ const ProjectPage = ({ username: propUsername }) => {
     }
   };
 
-  useEffect((), => {
+  useEffect(() => {
     fetchMeta();
   });
   /** --- Fetch Comments --- **/
