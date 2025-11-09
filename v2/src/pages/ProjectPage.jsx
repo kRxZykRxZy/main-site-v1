@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import MenuBar from "../components/menu-bar/menu-bar";
+import currentUsername from "../components/username/username";
 
 const BASE_URL = "https://sl-api-v1.onrender.com";
 
 const ProjectPage = ({ username: propUsername }) => {
   const { id: projectId } = useParams();
-  const [currentUsername, setCurrentUsername] = useState(propUsername || null);
   const [projectMeta, setProjectMeta] = useState(null);
   const [comments, setComments] = useState([]);
   const [loadingMeta, setLoadingMeta] = useState(true);
