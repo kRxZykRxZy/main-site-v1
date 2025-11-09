@@ -238,6 +238,8 @@ const ProjectPage = ({ username: propUsername }) => {
     }
   }, [projectId, currentUsername]);
 
+  if (loadingMeta || !projectMeta) return <p>Loading project...</p>;
+
   return (
     <div className="container mx-auto p-4">
       {loadingMeta ? (
