@@ -136,7 +136,7 @@ class MainPage extends Component {
               Dive into a world of creativity with innovative projects built using SnapLabs. SnapLabs is a mod of Scratch and TurboWarp — but better.
             </p>
             <a
-              href="/editor/"
+              href="/projects/0/editor/"
               className="bg-white text-indigo-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 inline-block"
             >
               Start Your Own Project
