@@ -38,6 +38,9 @@ const ProjectPage = ({ username: propUsername }) => {
     }
   };
 
+  useEffect((), => {
+    fetchMeta();
+  });
   /** --- Fetch Comments --- **/
   const fetchComments = async () => {
     setLoadingComments(true);
