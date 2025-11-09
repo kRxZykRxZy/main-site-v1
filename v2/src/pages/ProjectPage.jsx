@@ -175,7 +175,23 @@ const ProjectPage = ({ username: propUsername }) => {
       ) : (
         <div>
           <h1 className="text-3xl font-bold">{projectMeta?.title || "Untitled Project"}</h1>
-          <iframe src={"https://myscratchblocks.github.io/scratch-gui/embed#" + projectId} />
+
+          {/* Improved Scratch-style iframe */}
+          <div className="mt-4 flex justify-center">
+            <div
+              className="w-[80vw] max-w-[1200px] aspect-[4/3] shadow-lg rounded-lg overflow-hidden"
+              style={{ minHeight: "360px" }}
+            >
+              <iframe
+                src={`https://myscratchblocks.github.io/scratch-gui/embed#${projectId}?username=${currentUsername}`}
+                className="w-full h-full"
+                frameBorder="0"
+                allowFullScreen
+                title={projectMeta?.title || "Scratch Project"}
+              ></iframe>
+            </div>
+          </div>
+
           <p className="mt-2 text-gray-700">{projectMeta?.description || "No description."}</p>
           <p className="mt-1 text-sm text-gray-500">By {projectMeta?.author?.username || "Unknown"}</p>
 
