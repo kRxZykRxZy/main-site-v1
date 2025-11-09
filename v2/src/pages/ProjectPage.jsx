@@ -279,17 +279,19 @@ const ProjectPage = ({ username: propUsername }) => {
           )}
 
           {/* Scratch project iframe */}
-          <div className="mt-4 flex justify-center">
-            <div className="w-[80vw] max-w-[1200px] aspect-[4/3] shadow-lg rounded-lg overflow-hidden" style={{ minHeight: "360px" }}>
-              <iframe
-                src={`https://myscratchblocks.github.io/scratch-gui/embed#${projectId}?username=${currentUsername}`}
-                className="w-full h-full"
-                frameBorder="0"
-                allowFullScreen
-                title={projectMeta.title || "Scratch Project"}
-              />
+          {!loadingMeta && projectMeta && (
+            <div className="mt-4 flex justify-center">
+              <div className="w-[80vw] max-w-[1200px] aspect-[4/3] shadow-lg rounded-lg overflow-hidden" style={{ minHeight: "360px" }}>
+                <iframe
+                  src={`https://myscratchblocks.github.io/scratch-gui/embed#${projectId}?username=${currentUsername}`}
+                  className="w-full h-full"
+                  frameBorder="0"
+                  allowFullScreen
+                  title={projectMeta.title || "Scratch Project"}
+                />
+              </div>
             </div>
-          </div>
+          )} 
 
           {/* Project actions */}
           <div className="flex space-x-3 mt-3 flex-wrap">
