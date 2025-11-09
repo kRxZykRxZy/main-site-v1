@@ -8,6 +8,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: CODEBERG
 
     steps:
       - name: Checkout code
