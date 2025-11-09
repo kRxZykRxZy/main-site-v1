@@ -33,7 +33,7 @@ class MainPage extends Component {
       const response = await fetch(PROJECTS_API_URL);
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
-      const projects = data.projects.slice(0, 3);
+      const projects = data.projects.slice(0, 6);
       this.setState({ featuredProjects: projects, loadingProjects: false });
     } catch (error) {
       console.error("Error fetching featured projects:", error);
@@ -72,6 +72,7 @@ class MainPage extends Component {
     return featuredProjects.map((project, index) => {
       const id = project.link.split("#")[1];
       const author = project.author;
+      const pLink = '/projects/' + id;
 
       return (
         <div
@@ -92,7 +93,7 @@ class MainPage extends Component {
           </h3>
           <p className="text-gray-600 text-sm mb-4">Author: {author}</p>
           <a
-            href={project.link}
+            href={pLink}
             className="text-indigo-600 hover:text-indigo-800 font-medium inline-flex items-center"
           >
             View Project
