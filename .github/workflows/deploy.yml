@@ -22,6 +22,7 @@ jobs:
         working-directory: v2
         run: |
           npm install
+          npm install firebase
           npm run build
 
       - name: Deploy to Codeberg Pages
