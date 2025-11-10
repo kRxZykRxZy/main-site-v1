@@ -79,12 +79,12 @@ class MainPage extends Component {
           className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1"
         >
           <img
-            src={`https://sl-api-v1.onrender.com${project.image || "/static/No%20Cover%20Available.png"}`}
+            src={`https://sl-api-v1.onrender.com${project.image || "/static/No%20Cover%20Available.svg"}`}
             alt={`${project.name} thumbnail`}
             className="w-full h-40 object-cover rounded-md mb-4"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = "/images/No%20Cover%20Available.png";
+              e.target.src = "/static/No%20Cover%20Available.svg";
             }}
           />
           <h3 className="text-xl font-semibold text-gray-700 mb-2">
