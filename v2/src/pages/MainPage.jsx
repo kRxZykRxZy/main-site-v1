@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import MenuBar from "../components/menu-bar/menu-bar";
 
 class MainPage extends Component {
   constructor(props) {
