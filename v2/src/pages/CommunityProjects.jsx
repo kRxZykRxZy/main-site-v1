@@ -69,7 +69,7 @@ export default function SnapLabs() {
               ) : (
                 projects.map((project, i) => {
                   const link = '/projects/' + project.id;
-                  const imageSrc = `https://sl-api-v1.onrender.com${project.image || "/static/No%20Cover%20Available.png"}`;
+                  const imageSrc = `https://sl-api-v1.onrender.com${project.image || "/static/No%20Cover%20Available.svg"}`;
                   return (
                     <div
                       key={i}
@@ -80,7 +80,7 @@ export default function SnapLabs() {
                         alt={`${escapeHTML(project.name)} thumbnail`}
                         onError={(e) => {
                           e.target.onerror = null;
-                          e.target.src = "/images/No%20Cover%20Available.png";
+                          e.target.src = "/static/No%20Cover%20Available.svg";
                         }}
                         className="w-full h-40 object-cover rounded-md mb-4"
                       />
