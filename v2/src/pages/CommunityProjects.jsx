@@ -38,19 +38,6 @@ export default function SnapLabs() {
 
   return (
     <div className="font-inter bg-gray-50 text-slate-700 min-h-screen antialiased">
-      {/* Header */}
-      <header className="bg-white shadow-sm py-4">
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <a href="#" className="flex items-center space-x-2 text-2xl font-bold text-indigo-600">
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 
-                10-4.48 10-10S17.52 2 12 2zm-1 15h2v-6h-2v6zm0-8h2V7h-2v2z"/>
-            </svg>
-            <span>SnapLabs</span>
-          </a>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-20 px-4 text-center rounded-b-lg shadow-lg">
         <div className="container mx-auto max-w-4xl">
