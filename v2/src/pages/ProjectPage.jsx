@@ -273,6 +273,12 @@ const ProjectPage = ({ username: propUsername }) => {
     }
   }, [projectId, currentUsername]);
 
+  import { useMemo } from "react";
+
+  const iframeSrc = useMemo(() => {
+    return `https://myscratchblocks.github.io/scratch-gui/embed#${projectId}?username=${currentUsername}`;
+  }, [projectId, currentUsername]);
+
   /** --- Loading and Error States --- **/
   if (loadingMeta) {
       return (
@@ -359,7 +365,7 @@ const ProjectPage = ({ username: propUsername }) => {
         <div className="w-[80vw] max-w-[1200px] aspect-[4/3] shadow-lg rounded-lg overflow-hidden">
           <iframe
             // Make sure the iframe source is correct
-            src={`https://myscratchblocks.github.io/scratch-gui/embed#${projectId}?username=${currentUsername}`}
+            src={iframeSrc}
             className="w-full h-full"
             frameBorder="0"
             allowFullScreen
