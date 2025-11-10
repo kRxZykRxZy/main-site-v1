@@ -195,6 +195,8 @@ const ProjectPage = ({ username: propUsername }) => {
     }
   };
 
+  const idk = () => { console.log("idk") };
+
   const iframeSrc = useMemo(() => {
     return `https://myscratchblocks.github.io/scratch-gui/embed#${projectId}?username=${currentUsername}`;
   }, [projectId, currentUsername]);
@@ -374,6 +376,12 @@ const ProjectPage = ({ username: propUsername }) => {
 
       {/* Project actions */}
       <div className="flex space-x-3 mt-3 flex-wrap">
+        <button 
+          onClick={() => idk()}
+          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-red-600"
+        >
+          👁 {projectMeta.stats?.views || 0}
+        </button>
         <button
           onClick={() => handleAction("love")}
           className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
