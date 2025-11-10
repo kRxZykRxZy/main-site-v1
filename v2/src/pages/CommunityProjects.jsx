@@ -81,8 +81,8 @@ export default function SnapLabs() {
                 </p>
               ) : (
                 projects.map((project, i) => {
-                  const link = project.link?.replace("projects", "projects/") || "#";
-                  const imageSrc = `https://sl-api-v1.onrender.com${project.image || "/images/No%20Cover%20Available.png"}`;
+                  const link = '/projects/' + project.id;
+                  const imageSrc = `https://sl-api-v1.onrender.com${project.image || "/static/No%20Cover%20Available.png"}`;
                   return (
                     <div
                       key={i}
