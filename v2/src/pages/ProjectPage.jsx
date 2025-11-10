@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams } from "react-router-dom";
 
 const BASE_URL = "https://sl-api-v1.onrender.com";
@@ -194,8 +194,6 @@ const ProjectPage = ({ username: propUsername }) => {
       console.error(err);
     }
   };
-
-  import { useMemo } from "react";
 
   const iframeSrc = useMemo(() => {
     return `https://myscratchblocks.github.io/scratch-gui/embed#${projectId}?username=${currentUsername}`;
