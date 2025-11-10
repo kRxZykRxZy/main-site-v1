@@ -70,7 +70,7 @@ class MainPage extends Component {
     }
 
     return featuredProjects.map((project, index) => {
-      const id = project.link.split("#")[1];
+      const id = project.id;
       const author = project.author;
       const pLink = '/projects/' + id;
 
@@ -80,7 +80,7 @@ class MainPage extends Component {
           className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1"
         >
           <img
-            src={`https://sl-api-v1.onrender.com${project.image || "/images/No%20Cover%20Available.png"}`}
+            src={`https://sl-api-v1.onrender.com${project.image || "/static/No%20Cover%20Available.png"}`}
             alt={`${project.name} thumbnail`}
             className="w-full h-40 object-cover rounded-md mb-4"
             onError={(e) => {
