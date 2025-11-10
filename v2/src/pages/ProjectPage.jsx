@@ -54,7 +54,7 @@ const ProjectPage = ({ username: propUsername }) => {
   const fetchComments = async () => {
     setLoadingComments(true);
     try {
-      const res = await fetch(`${BASE_URL}/api/projects/${projectId}/comments`);
+      const res = await fetch(`${BASE_URL}/${projectId}/comments`);
       const data = await res.json();
       // Ensure data is an array before setting state
       setComments(Array.isArray(data) ? data : []);
@@ -118,7 +118,7 @@ const ProjectPage = ({ username: propUsername }) => {
   const postComment = async (text) => {
     if (!currentUsername || !text.trim()) return;
     try {
-      const res = await fetch(`${BASE_URL}/api/projects/${projectId}/comments`, {
+      const res = await fetch(`${BASE_URL}/${projectId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, user: { username: currentUsername } }),
@@ -138,7 +138,7 @@ const ProjectPage = ({ username: propUsername }) => {
     if (!currentUsername || !text.trim()) return;
     try {
       const res = await fetch(
-        `${BASE_URL}/api/projects/${projectId}/comments/${commentId}/reply`,
+        `${BASE_URL}/${projectId}/comments/${commentId}/reply`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
