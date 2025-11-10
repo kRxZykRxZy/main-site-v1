@@ -5,6 +5,7 @@ import EditorPageWrapper from "./pages/EditorPage";
 import ProjectPage from "./pages/ProjectPage";
 import SiteAuth from "./pages/SiteAuth"; // renamed to match convention
 import Ai from "./pages/AIAssistant";
+import CP from "./pages/CommunityProjects";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebaseConfig"; // import from your firebase setup
 
@@ -46,11 +47,12 @@ const App = () => {
           element={<ProjectPage username={username} />}
         />
         <Route path="/account" element={<SiteAuth />} />
+        <Route path="/community-projects" element={<CP />} />
         <Route path="/AI-Assistant" element={<Ai />} />
         <Route
           path="*"
           element={
-            <h1 className="text-center mt-20 text-2xl">Page Not Found</h1>
+            <h1 className="text-center mt-20 text-2xl">404! Page Not Found! Be Careful Someone Might Be Trying To Steal Your Projects!</h1>
           }
         />
       </Routes>
