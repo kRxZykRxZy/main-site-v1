@@ -195,6 +195,12 @@ const ProjectPage = ({ username: propUsername }) => {
     }
   };
 
+  import { useMemo } from "react";
+
+  const iframeSrc = useMemo(() => {
+    return `https://myscratchblocks.github.io/scratch-gui/embed#${projectId}?username=${currentUsername}`;
+  }, [projectId, currentUsername]);
+
   /** --- Recursive Comment Component --- **/
   const CommentItem = ({ comment, depth = 0 }) => {
     const [showReplyForm, setShowReplyForm] = useState(false);
@@ -271,12 +277,6 @@ const ProjectPage = ({ username: propUsername }) => {
             );
         }
     }
-  }, [projectId, currentUsername]);
-
-  import { useMemo } from "react";
-
-  const iframeSrc = useMemo(() => {
-    return `https://myscratchblocks.github.io/scratch-gui/embed#${projectId}?username=${currentUsername}`;
   }, [projectId, currentUsername]);
 
   /** --- Loading and Error States --- **/
