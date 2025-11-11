@@ -57,7 +57,7 @@ const SnapLabsDashboard = () => {
 
   const sendEmailToServer = async (username, email) => {
     try {
-      await fetch(`${API_BASE}/api/set-email`, {
+      await fetch(`${API_BASE}/users/${username}/email/set`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email }),
@@ -201,7 +201,7 @@ const SnapLabsDashboard = () => {
             <h3 className="text-2xl font-semibold mb-2">
               Welcome, {user.displayName || "User"}!
             </h3>
-            <p>Email: {email}</p>
+            <p>Email: {user.email}</p>
 
             {userData && (
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-4 gap-4 text-center">
