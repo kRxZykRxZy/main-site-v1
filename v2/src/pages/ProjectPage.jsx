@@ -280,13 +280,6 @@ const ProjectPage = ({ username: propUsername }) => {
   }, [projectId, currentUsername]);
 
   /** --- Loading and Error States --- **/
-  if (loadingMeta) {
-      return (
-          <div className="container mx-auto p-4 text-center">
-              <p className="text-xl font-semibold">Loading project...</p>
-          </div>
-      );
-  }
 
   // FIX: Handle API errors gracefully
   if (error) {
