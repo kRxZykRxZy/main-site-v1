@@ -113,6 +113,10 @@ const SnapLabsDashboard = () => {
     setUserData(null);
   };
 
+  const handleClickMyStuff = () => {
+    window.location.href = "/dashboard";
+  };
+  
   const handleEmailChange = async () => {
     if (!newEmail || !user) return;
 
@@ -130,7 +134,7 @@ const SnapLabsDashboard = () => {
     } catch (err) {
       console.error(err);
       alert(
-        "Failed to update email. You may need to re-login to change your email."
+        "Failed to update email. You may need to re-login to change your email. Details: " + err
       );
     }
   };
@@ -233,6 +237,12 @@ const SnapLabsDashboard = () => {
             )}
 
             <div className="mt-4 flex space-x-2">
+              <button
+                onClick={handleClickMyStuff}
+                className="bg-yellow-400 py-1 px-3 rounded hover:bg-yellow-500"
+              >
+                My Stuff
+              </button>
               <button
                 onClick={() => setShowEmailModal(true)}
                 className="bg-yellow-400 py-1 px-3 rounded hover:bg-yellow-500"
