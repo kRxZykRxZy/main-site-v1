@@ -1,16 +1,27 @@
 import React, { useEffect, useState, memo } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebaseConfig";
+import SnapLabsSpinner from "../components/SnapLabsSpinner";
 
 const UserProfile = memo(() => {
   const [iframeSrc, setIframeSrc] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const username = localStorage.getItem("username");
-    if (username) {
-      setIframeSrc(`https://sl-api-v1.onrender.com/users/${username}`);
-    } else {
-      window.location.href = "/404";
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const username = user.displayName || null;
+        if (username) {
+          setIframeSrc(`https://sl-api-v1.onrender.com/users/${username}`);
+        } else {
+          window.location.href = "/404";
+        }
+      } else {
+        window.location.href = "/404";
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -22,17 +33,10 @@ const UserProfile = memo(() => {
 
   return (
     <div className="font-inter bg-slate-50 text-slate-700 min-h-screen">
-      {/* Loading Spinner */}
       {loading && (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-white z-10">
-          <div className="border-4 border-gray-200 border-t-indigo-500 rounded-full w-10 h-10 animate-spin mb-3"></div>
-          <span className="text-gray-700 font-medium text-sm">
-            Loading your SnapLabs workspace...
-          </span>
-        </div>
+        <SnapLabsSpinner text="Loading your SnapLabs workspace..." />
       )}
 
-      {/* Iframe */}
       {iframeSrc && (
         <iframe
           id="snaplabs-iframe"
