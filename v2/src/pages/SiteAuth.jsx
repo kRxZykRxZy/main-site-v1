@@ -124,7 +124,7 @@ const SnapLabsDashboard = () => {
     try {
       // Update email in Firebase
       await verifyBeforeUpdateEmail(user, newEmail);
-      alert("We have sent you an email to " + ${newEmail} + " , please verify this email to make this your primary email. Please check your spam as it may end up there.");
+      alert("We have sent you an email to " + newEmail + " , please verify this email to make this your primary email. Please check your spam as it may end up there.");
 
       // Update email on server
       await sendEmailToServer(user.displayName, newEmail);
