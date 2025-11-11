@@ -140,10 +140,10 @@ const SnapLabsAuth = () => {
                 Home
               </button>
               <button
-                onClick={() => (window.location.href = "/mystuff")}
+                onClick={() => (window.location.href = "/dashboard")}
                 className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md transition"
               >
-                My Stuff
+                Dashboard
               </button>
               <button
                 onClick={handleLogout}
