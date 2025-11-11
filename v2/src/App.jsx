@@ -7,6 +7,7 @@ import SiteAuth from "./pages/SiteAuth"; // renamed to match convention
 import Ai from "./pages/AIAssistant";
 import Cp from "./pages/CommunityProjects";
 import MyStuff from "./pages/MyStuff";
+import Spinner from "./components/spinner/workspace";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebaseConfig"; // import from your firebase setup
 
@@ -30,7 +31,7 @@ const App = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen text-xl">
-        Loading...
+        <Spinner text="Loading Your SnapLabs Workspace..." />
       </div>
     );
   }
