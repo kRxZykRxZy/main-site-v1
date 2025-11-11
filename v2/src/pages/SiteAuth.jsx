@@ -6,6 +6,7 @@ import {
   updateProfile,
   updateEmail as firebaseUpdateEmail,
   onAuthStateChanged,
+  verifyBeforeUpdateEmail
 } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import Spinner from "../components/spinner/workspace";
@@ -122,7 +123,8 @@ const SnapLabsDashboard = () => {
 
     try {
       // Update email in Firebase
-      await firebaseUpdateEmail(user, newEmail);
+      await verifyBeforeUpdateEmail(user, newEmail);
+      alert("We have sent you an email to " + ${newEmail} + " , please verify this email to make this your primary email. Please check your spam as it may end up there.");
 
       // Update email on server
       await sendEmailToServer(user.displayName, newEmail);
