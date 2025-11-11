@@ -50,7 +50,7 @@ const App = () => {
           element={<ProjectPage username={username} />}
         />
         <Route path="/account" element={<SiteAuth />} />
-        <Route path"/editor-frame" element={<Editor />} />
+        <Route path="/editor-frame" element={<Editor />} />
         <Route path="/community-projects" element={<Cp />} />
         <Route path="/AI-Assistant" element={<Ai />} />
         <Route path="/dashboard" element={<MyStuff />} />
