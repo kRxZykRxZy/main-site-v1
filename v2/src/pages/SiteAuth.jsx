@@ -4,6 +4,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
+  updateEmail as firebaseUpdateEmail,
   onAuthStateChanged,
 } from "firebase/auth";
 import { auth } from "../firebaseConfig";
@@ -18,6 +19,7 @@ const SnapLabsDashboard = () => {
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
   const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [newEmail, setNewEmail] = useState("");
 
@@ -31,6 +33,7 @@ const SnapLabsDashboard = () => {
       } else {
         setUser(null);
         setUserData(null);
+        setLoading(false);
       }
     });
     return () => unsubscribe();
@@ -38,6 +41,7 @@ const SnapLabsDashboard = () => {
 
   const fetchUserData = async (username) => {
     if (!username) return;
+    setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/userapi/${username}`);
       if (!res.ok) throw new Error("Failed to fetch user data");
@@ -46,6 +50,8 @@ const SnapLabsDashboard = () => {
       setEmail(data.email || "");
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -108,28 +114,39 @@ const SnapLabsDashboard = () => {
   };
 
   const handleEmailChange = async () => {
-    if (!newEmail) return;
-    await sendEmailToServer(username, newEmail);
-    setEmail(newEmail);
-    setShowEmailModal(false);
-    fetchUserData(username);
+    if (!newEmail || !user) return;
+
+    try {
+      // Update email in Firebase
+      await firebaseUpdateEmail(user, newEmail);
+
+      // Update email on server
+      await sendEmailToServer(user.displayName, newEmail);
+
+      // Update local state and refetch data
+      setEmail(newEmail);
+      setShowEmailModal(false);
+      fetchUserData(user.displayName);
+    } catch (err) {
+      console.error(err);
+      alert(
+        "Failed to update email. You may need to re-login to change your email."
+      );
+    }
   };
 
-  // Find trending project by views
   const getTrendingProject = () => {
-    if (!userData || !userData.projects || userData.projects.length === 0)
-      return null;
+    if (!userData?.projects || userData.projects.length === 0) return null;
     return [...userData.projects].sort(
       (a, b) => (b.stats.views || 0) - (a.stats.views || 0)
     )[0];
   };
 
   const trendingProject = getTrendingProject();
-  if (!trendingProject || !userData) {
-    return (
-      <Spinner text="Loading Your SnapLabs Workspace..." />
-    ) 
-  } 
+
+  if (loading) {
+    return <Spinner text="Loading Your SnapLabs Workspace..." />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans p-6">
@@ -178,7 +195,7 @@ const SnapLabsDashboard = () => {
           </div>
         </div>
       ) : (
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           {/* User Info & Stats */}
           <div className="bg-white p-6 rounded-lg shadow mb-6">
             <h3 className="text-2xl font-semibold mb-2">
@@ -190,25 +207,25 @@ const SnapLabsDashboard = () => {
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-4 gap-4 text-center">
                 <div className="bg-indigo-50 p-3 rounded">
                   <p className="font-semibold text-indigo-700">
-                    {userData.stats.totalProjects}
+                    {userData.stats.totalProjects || 0}
                   </p>
                   <p className="text-sm text-gray-600">Projects</p>
                 </div>
                 <div className="bg-indigo-50 p-3 rounded">
                   <p className="font-semibold text-indigo-700">
-                    {userData.stats.totalViews}
+                    {userData.stats.totalViews || 0}
                   </p>
                   <p className="text-sm text-gray-600">Views</p>
                 </div>
                 <div className="bg-indigo-50 p-3 rounded">
                   <p className="font-semibold text-indigo-700">
-                    {userData.stats.totalLikes}
+                    {userData.stats.totalLikes || 0}
                   </p>
                   <p className="text-sm text-gray-600">Likes</p>
                 </div>
                 <div className="bg-indigo-50 p-3 rounded">
                   <p className="font-semibold text-indigo-700">
-                    {userData.stats.totalFavorites}
+                    {userData.stats.totalFavorites || 0}
                   </p>
                   <p className="text-sm text-gray-600">Favorites</p>
                 </div>
@@ -232,7 +249,7 @@ const SnapLabsDashboard = () => {
           </div>
 
           {/* Trending Project */}
-          {trendingProject && (
+          {trendingProject ? (
             <div className="bg-white p-4 rounded-lg shadow mb-6">
               <h4 className="text-xl font-semibold mb-2 text-indigo-700">
                 Trending Project: {trendingProject.title}
@@ -251,6 +268,10 @@ const SnapLabsDashboard = () => {
                 View Project
               </a>
             </div>
+          ) : (
+            <p className="text-center text-gray-600 mt-4">
+              No trending project available.
+            </p>
           )}
         </div>
       )}
