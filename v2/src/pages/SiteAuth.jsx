@@ -7,6 +7,7 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { auth } from "../firebaseConfig";
+import Spinner from "../components/spinner/workspace";
 
 const API_BASE = "https://sl-api-v1.onrender.com";
 
@@ -124,6 +125,11 @@ const SnapLabsDashboard = () => {
   };
 
   const trendingProject = getTrendingProject();
+  if (!trendingProject || !userData) {
+    return (
+      <Spinner text="Loading Your SnapLabs Workspace..." />
+    ) 
+  } 
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans p-6">
