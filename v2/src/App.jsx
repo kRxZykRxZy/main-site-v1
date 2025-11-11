@@ -7,6 +7,7 @@ import SiteAuth from "./pages/SiteAuth"; // renamed to match convention
 import Ai from "./pages/AIAssistant";
 import Cp from "./pages/CommunityProjects";
 import MyStuff from "./pages/MyStuff";
+import Editor from "./pages/EditorFrame";
 import Spinner from "./components/spinner/workspace";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebaseConfig"; // import from your firebase setup
@@ -49,6 +50,7 @@ const App = () => {
           element={<ProjectPage username={username} />}
         />
         <Route path="/account" element={<SiteAuth />} />
+        <Route path"/editor-frame" element={<Editor />} />
         <Route path="/community-projects" element={<Cp />} />
         <Route path="/AI-Assistant" element={<Ai />} />
         <Route path="/dashboard" element={<MyStuff />} />
