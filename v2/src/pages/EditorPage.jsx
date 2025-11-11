@@ -92,7 +92,7 @@ class EditorPage extends React.Component {
 
     // Set iframe src
     const hash = id || "0";
-    const baseUrl = "/editor-frame";
+    const baseUrl = "https://myscratchblocks.github.io/scratch-gui;
     const finalUrl = `${baseUrl}#${hash}?username=${username || 'test'}`;
 
     if (this.iframeRef.current) {
