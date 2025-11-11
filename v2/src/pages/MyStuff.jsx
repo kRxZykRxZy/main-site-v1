@@ -1,7 +1,7 @@
 import React, { useEffect, useState, memo } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebaseConfig";
-import SnapLabsSpinner from "../components/SnapLabsSpinner";
+import SnapLabsSpinner from "../components/spinner/workspace";
 
 const UserProfile = memo(() => {
   const [iframeSrc, setIframeSrc] = useState("");
@@ -34,7 +34,7 @@ const UserProfile = memo(() => {
   return (
     <div className="font-inter bg-slate-50 text-slate-700 min-h-screen">
       {loading && (
-        <SnapLabsSpinner text="Loading your SnapLabs workspace..." />
+        <SnapLabsSpinner text="Loading Your SnapLabs Workspace..." />
       )}
 
       {iframeSrc && (
