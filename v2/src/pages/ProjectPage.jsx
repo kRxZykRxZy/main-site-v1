@@ -286,7 +286,7 @@ const ProjectPage = ({ username: propUsername }) => {
       return (
           <div className="container mx-auto p-4">
               <h1 className="text-2xl font-bold text-red-600">Error Loading Project</h1>
-              <p className="text-gray-700">A network or server error occurred. Please try again.</p>
+              <p className="text-gray-700">The Project May Be Unshared Or Our Servers May Be Down!</p>
               <p className="text-sm text-gray-500">Details: {error}</p>
           </div>
       );
@@ -313,7 +313,7 @@ const ProjectPage = ({ username: propUsername }) => {
           className="w-full text-3xl font-bold border-b-2 border-gray-300 mb-2 p-1"
         />
       ) : (
-        <h1 className="text-3xl font-bold mb-2">{projectMeta.title}</h1>
+        <h1 className="text-center text-3xl font-bold mb-2">{projectMeta.title}</h1>
       )}
 
       {/* Description */}
@@ -325,10 +325,10 @@ const ProjectPage = ({ username: propUsername }) => {
           placeholder="Project description..."
         />
       ) : (
-        <p className="text-gray-700 mb-2">{projectMeta.description}</p>
+        <p className="text-center text-gray-700 mb-2">{projectMeta.description}</p>
       )}
 
-      <p className="mt-1 text-sm text-gray-500">
+      <p className="text-center mt-1 text-sm text-gray-500">
         By {projectMeta.author?.username || "Unknown"}
       </p>
 
