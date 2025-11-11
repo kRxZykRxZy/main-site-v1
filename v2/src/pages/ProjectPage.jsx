@@ -57,7 +57,7 @@ const ProjectPage = ({ username: propUsername }) => {
       const res = await fetch(`${BASE_URL}/${projectId}/comments`);
       const data = await res.json();
       // Ensure data is an array before setting state
-      setComments(Array.isArray(data) ? data : []);
+      setComments(Array.isArray(data) ? data.slice().reverse() : []);
     } catch (err) {
       console.error("Error fetching comments:", err);
       setComments([]);
