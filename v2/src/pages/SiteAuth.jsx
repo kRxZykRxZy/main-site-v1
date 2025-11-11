@@ -6,26 +6,59 @@ import {
   updateProfile,
   onAuthStateChanged,
 } from "firebase/auth";
-import { auth } from "../firebaseConfig"; 
+import { auth } from "../firebaseConfig";
 
-const SnapLabsAuth = () => {
+const API_BASE = "https://sl-api-v1.onrender.com";
+
+const SnapLabsDashboard = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
+  const [userData, setUserData] = useState(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
 
+  // Firebase auth listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         window.username = currentUser.displayName;
+        fetchUserData(currentUser.displayName);
       } else {
         setUser(null);
+        setUserData(null);
       }
     });
     return () => unsubscribe();
-  }, [auth]);
+  }, []);
+
+  const fetchUserData = async (username) => {
+    if (!username) return;
+    try {
+      const res = await fetch(`${API_BASE}/userapi/${username}`);
+      if (!res.ok) throw new Error("Failed to fetch user data");
+      const data = await res.json();
+      setUserData(data);
+      setEmail(data.email || "");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const sendEmailToServer = async (username, email) => {
+    try {
+      await fetch(`${API_BASE}/api/set-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email }),
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleRegister = async () => {
     setError("");
@@ -36,8 +69,11 @@ const SnapLabsAuth = () => {
     try {
       const res = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(res.user, { displayName: username });
-      window.username = username;
       setUser(res.user);
+      window.username = username;
+
+      await sendEmailToServer(username, email);
+      fetchUserData(username);
     } catch (err) {
       setError(err.message);
     }
@@ -52,7 +88,10 @@ const SnapLabsAuth = () => {
     try {
       const res = await signInWithEmailAndPassword(auth, email, password);
       setUser(res.user);
-      window.username = username
+      window.username = res.user.displayName;
+
+      await sendEmailToServer(res.user.displayName, res.user.email);
+      fetchUserData(res.user.displayName);
     } catch (err) {
       setError(err.message);
     }
@@ -64,99 +103,183 @@ const SnapLabsAuth = () => {
     setUsername("");
     setEmail("");
     setPassword("");
-    setError("");
+    setUserData(null);
   };
 
+  const handleEmailChange = async () => {
+    if (!newEmail) return;
+    await sendEmailToServer(username, newEmail);
+    setEmail(newEmail);
+    setShowEmailModal(false);
+    fetchUserData(username);
+  };
+
+  // Find trending project by views
+  const getTrendingProject = () => {
+    if (!userData || !userData.projects || userData.projects.length === 0)
+      return null;
+    return [...userData.projects].sort(
+      (a, b) => (b.stats.views || 0) - (a.stats.views || 0)
+    )[0];
+  };
+
+  const trendingProject = getTrendingProject();
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 font-sans">
-      <main className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold mb-8 text-center text-indigo-600">
-          SnapLabs
-        </h2>
+    <div className="min-h-screen bg-gray-100 font-sans p-6">
+      {!user ? (
+        <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
+          <h2 className="text-3xl font-bold text-indigo-600 mb-6 text-center">
+            SnapLabs
+          </h2>
+          {error && <p className="text-red-600 mb-4">{error}</p>}
 
-        {!user ? (
-          <>
-            {error && <p className="text-red-600 mb-4">{error}</p>}
+          <input
+            type="text"
+            placeholder="Username (for signup)"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full mb-3 px-4 py-2 border rounded-md"
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full mb-3 px-4 py-2 border rounded-md"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full mb-3 px-4 py-2 border rounded-md"
+          />
 
-            <label className="block mb-1 text-sm font-medium text-gray-700">
-              Username (Not Required For Login) 
-            </label>
-            <input
-              type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-
-            <label className="block mb-1 text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-
-            <label className="block mb-1 text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-
-            <div className="flex justify-between space-x-4">
-              <button
-                onClick={handleRegister}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md transition"
-              >
-                Register
-              </button>
-              <button
-                onClick={handleLogin}
-                className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 rounded-md transition"
-              >
-                Login
-              </button>
-            </div>
-          </>
-        ) : (
-          <div className="mt-8 p-6 bg-indigo-50 rounded-lg shadow-inner text-indigo-900">
-            <h3 className="text-2xl font-semibold mb-3">
+          <div className="flex space-x-2">
+            <button
+              onClick={handleRegister}
+              className="flex-1 bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700"
+            >
+              Register
+            </button>
+            <button
+              onClick={handleLogin}
+              className="flex-1 bg-indigo-500 text-white py-2 rounded-md hover:bg-indigo-600"
+            >
+              Login
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="max-w-6xl mx-auto">
+          {/* User Info & Stats */}
+          <div className="bg-white p-6 rounded-lg shadow mb-6">
+            <h3 className="text-2xl font-semibold mb-2">
               Welcome, {user.displayName || "User"}!
             </h3>
-            <p className="mb-6">Email: {user.email}</p>
-            <div className="flex justify-between space-x-4">
+            <p>Email: {email}</p>
+
+            {userData && (
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-4 gap-4 text-center">
+                <div className="bg-indigo-50 p-3 rounded">
+                  <p className="font-semibold text-indigo-700">
+                    {userData.stats.totalProjects}
+                  </p>
+                  <p className="text-sm text-gray-600">Projects</p>
+                </div>
+                <div className="bg-indigo-50 p-3 rounded">
+                  <p className="font-semibold text-indigo-700">
+                    {userData.stats.totalViews}
+                  </p>
+                  <p className="text-sm text-gray-600">Views</p>
+                </div>
+                <div className="bg-indigo-50 p-3 rounded">
+                  <p className="font-semibold text-indigo-700">
+                    {userData.stats.totalLikes}
+                  </p>
+                  <p className="text-sm text-gray-600">Likes</p>
+                </div>
+                <div className="bg-indigo-50 p-3 rounded">
+                  <p className="font-semibold text-indigo-700">
+                    {userData.stats.totalFavorites}
+                  </p>
+                  <p className="text-sm text-gray-600">Favorites</p>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-4 flex space-x-2">
               <button
-                onClick={() => (window.location.href = "/")}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md transition"
+                onClick={() => setShowEmailModal(true)}
+                className="bg-yellow-400 py-1 px-3 rounded hover:bg-yellow-500"
               >
-                Home
-              </button>
-              <button
-                onClick={() => (window.location.href = "/dashboard")}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md transition"
-              >
-                Dashboard
+                Change Email
               </button>
               <button
                 onClick={handleLogout}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-md transition"
+                className="bg-red-600 py-1 px-3 rounded text-white hover:bg-red-700"
               >
                 Logout
               </button>
             </div>
           </div>
-        )}
-      </main>
+
+          {/* Trending Project */}
+          {trendingProject && (
+            <div className="bg-white p-4 rounded-lg shadow mb-6">
+              <h4 className="text-xl font-semibold mb-2 text-indigo-700">
+                Trending Project: {trendingProject.title}
+              </h4>
+              <p className="text-sm text-gray-600">
+                Views: {trendingProject.stats.views || 0} | Likes:{" "}
+                {trendingProject.stats.loves || 0} | Favorites:{" "}
+                {trendingProject.stats.favorites || 0}
+              </p>
+              <a
+                href={trendingProject.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-600 hover:text-indigo-800 text-sm mt-2 inline-block"
+              >
+                View Project
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Email Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-80">
+            <h3 className="text-lg font-semibold mb-2">Change Email</h3>
+            <input
+              type="email"
+              placeholder="New Email"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              className="w-full mb-3 px-3 py-2 border rounded"
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowEmailModal(false)}
+                className="py-1 px-3 rounded bg-gray-300 hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEmailChange}
+                className="py-1 px-3 rounded bg-indigo-600 text-white hover:bg-indigo-700"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default SnapLabsAuth;
+export default SnapLabsDashboard;
