@@ -1,0 +1,34 @@
+/* Project Meta Editor styles (editable) */
+.project-meta-editor input.project-title-input {
+  width: 100%;
+  font-size: 2rem;
+  font-weight: bold;
+  border-bottom: 2px solid #ccc;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.project-meta-editor textarea.project-desc-input {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  resize: vertical;
+}
+
+/* Project Meta Display styles (read-only) */
+.project-meta-display .project-title-display {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.project-meta-display .project-desc-display {
+  color: #555;
+  margin-bottom: 0.25rem;
+}
+
+.project-meta-display .project-author-display {
+  font-size: 0.875rem;
+  color: #888;
+}

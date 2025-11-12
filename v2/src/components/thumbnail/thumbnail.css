@@ -1,0 +1,10 @@
+.thumbnail-uploader input[type="file"] {
+  margin-top: 0.25rem;
+}
+
+.thumbnail-uploader .uploading-text {
+  display: inline-block;
+  margin-left: 0.5rem;
+  color: #6b7280; /* gray-500 */
+  font-size: 0.875rem;
+}
