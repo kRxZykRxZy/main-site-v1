@@ -34,8 +34,7 @@ const ai = () => {
       ];
 
       const payload = { contents: chatHistory };
-      const apiKey =
-        "AIzaSyBVZwRE3rId" + "UZqgVeSy5RcmUn-adMhwimI"; // injected at runtime
+      const apiKey = "AIzaSyB-gswkWt6KvFr4HWRe9VmuCendWlbmeTY"; // injected at runtime
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
       const response = await fetch(apiUrl, {

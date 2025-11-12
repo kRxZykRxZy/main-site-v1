@@ -12,5 +12,4 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-const getUsername = () => currentUsername;
-export default getUsername;
+export const username = currentUsername;
