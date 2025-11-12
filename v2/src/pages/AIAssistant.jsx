@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 
-const ai = () => {
+const AiAssistant = () => {
   const [projectIdeaInput, setProjectIdeaInput] = useState("");
   const [projectIdeaOutput, setProjectIdeaOutput] = useState(
-    "Hello! I am an AI Assistant that can help you with SnapLabs. If you type something here, the AI response will appear."
+    "Hello! I am an AI Assistant that can help you with SnapLabs. Type something here and the AI response will appear."
   );
   const [loading, setLoading] = useState(false);
 
@@ -22,36 +22,41 @@ const ai = () => {
     setLoading(true);
 
     try {
-      const chatHistory = [
-        {
-          role: "user",
-          parts: [
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+      if (!apiKey) {
+        throw new Error("OpenAI API key not found. Make sure VITE_OPENAI_API_KEY is set.");
+      }
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
             {
-              text: `You are an AI Assistant designed to help people with coding in the SnapLabs Scratch Mod. Respond to the following prompt: "${prompt}".`,
+              role: "system",
+              content:
+                "You are an AI Assistant designed to help people with coding in the SnapLabs Scratch Mod.",
+            },
+            {
+              role: "user",
+              content: prompt,
             },
           ],
-        },
-      ];
-
-      const payload = { contents: chatHistory };
-      const apiKey =
-        "AIzaSyBVZwRE3rId" + "UZqgVeSy5RcmUn-adMhwimI"; // injected at runtime
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+          temperature: 0.7,
+        }),
       });
 
-      const result = await response.json();
-      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-      setProjectIdeaOutput(
-        text ||
-          "Failed to contact the AI Assistant. Please try again."
-      );
+      const data = await response.json();
+      const text = data?.choices?.[0]?.message?.content;
+
+      setProjectIdeaOutput(text || "Failed to get a response from the AI Assistant.");
     } catch (error) {
-      console.error("Gemini API error:", error);
+      console.error("OpenAI API error:", error);
       setProjectIdeaOutput(
         "Failed to contact the AI Assistant. Check your connection and try again."
       );
@@ -78,12 +83,17 @@ const ai = () => {
           ✨ Coding Assistant (powered by AI) ✨
         </h2>
         <p className="text-gray-600 mb-6 text-center">
-          Ask the AI Assistant for help with SnapLabs coding, debugging, or
-          ideas.
+          Ask the AI Assistant for help with SnapLabs coding, debugging, or ideas.
         </p>
         <textarea
           value={projectIdeaInput}
           onChange={(e) => setProjectIdeaInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSendMessage();
+            }
+          }}
           placeholder="e.g., 'How do I code this: [enter coding problem]'"
           className="w-full p-4 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 mb-4 h-32 resize-y"
         />
@@ -107,4 +117,4 @@ const ai = () => {
   );
 };
 
-export default ai;
+export default AiAssistant;
