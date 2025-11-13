@@ -30,10 +30,8 @@ class MenuBar extends React.Component {
     try {
       const data = await API.getProjects();
       const filtered = data.projects
-        .filter((p) =>
-          p.name.toLowerCase().includes(value.toLowerCase())
-        )
-        .slice(0, 5); // top 5 results
+        .filter((p) => p.name.toLowerCase().includes(value.toLowerCase()))
+        .slice(0, 5);
 
       this.setState({ searchResults: filtered, showDropdown: true });
     } catch (err) {
@@ -56,16 +54,23 @@ class MenuBar extends React.Component {
 
     return (
       <header className="bg-white shadow-sm py-4 relative z-50">
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          {/* Logo */}
-          <a
-            href="/"
-            className="flex items-center space-x-2 text-2xl font-bold text-indigo-600"
-          >
-            <span>SnapLabs</span>
-          </a>
+        <div className="container mx-auto px-4 flex items-center justify-between">
+          {/* Left Section - Logo */}
+          <div className="flex items-center justify-start flex-shrink-0">
+            <a
+              href="/"
+              className="flex items-center space-x-2 text-2xl font-bold text-indigo-600"
+            >
+              <img
+                src="/static/snaplabs_logo.png"
+                alt="SnapLabs Logo"
+                className="w-8 h-8"
+              />
+              <span>SnapLabs</span>
+            </a>
+          </div>
 
-          {/* Search bar */}
+          {/* Center Section - Search bar (Desktop only) */}
           <form
             onSubmit={this.handleSearchSubmit}
             className="relative w-1/2 hidden md:block"
@@ -84,7 +89,7 @@ class MenuBar extends React.Component {
               Search
             </button>
 
-            {/* Dropdown search results */}
+            {/* Dropdown search results (desktop) */}
             {showDropdown && searchResults.length > 0 && (
               <ul className="absolute left-0 mt-2 w-full bg-white shadow-lg rounded-lg border border-gray-200 max-h-60 overflow-y-auto">
                 {searchResults.map((proj) => (
@@ -109,23 +114,35 @@ class MenuBar extends React.Component {
             )}
           </form>
 
-          {/* Desktop Navigation */}
+          {/* Right Section - Navigation */}
           <nav className="hidden md:flex space-x-6">
             <a href="/" className="text-gray-600 hover:text-indigo-600 font-medium">
               Home
             </a>
-            <a href="/community-projects" className="text-gray-600 hover:text-indigo-600 font-medium">
+            <a
+              href="/community-projects"
+              className="text-gray-600 hover:text-indigo-600 font-medium"
+            >
               Featured
             </a>
-            <a href="/AI-Assistant" className="text-gray-600 hover:text-indigo-600 font-medium">
+            <a
+              href="/AI-Assistant"
+              className="text-gray-600 hover:text-indigo-600 font-medium"
+            >
               AI
             </a>
             {showMessages && (
-              <a href="/messages" className="text-gray-600 hover:text-indigo-600 font-medium">
+              <a
+                href="/messages"
+                className="text-gray-600 hover:text-indigo-600 font-medium"
+              >
                 Messages
               </a>
             )}
-            <a href="/account" className="text-gray-600 hover:text-indigo-600 font-medium">
+            <a
+              href="/account"
+              className="text-gray-600 hover:text-indigo-600 font-medium"
+            >
               Dashboard
             </a>
           </nav>
@@ -141,30 +158,95 @@ class MenuBar extends React.Component {
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           </button>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation (with search bar inside dropdown) */}
         {mobileOpen && (
           <div className="md:hidden bg-white py-2 shadow-md">
+            {/* Mobile search */}
+            <form
+              onSubmit={this.handleSearchSubmit}
+              className="relative px-4 mb-3"
+            >
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={this.handleSearchChange}
+                placeholder="Search projects..."
+                className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <button
+                type="submit"
+                className="absolute right-6 top-1/2 -translate-y-1/2 bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700"
+              >
+                Search
+              </button>
+
+              {/* Dropdown results in mobile */}
+              {showDropdown && searchResults.length > 0 && (
+                <ul className="absolute left-4 right-4 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 max-h-60 overflow-y-auto">
+                  {searchResults.map((proj) => (
+                    <li
+                      key={proj.id}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() =>
+                        (window.location.href = `/projects/${proj.id}`)
+                      }
+                    >
+                      <div className="flex items-center space-x-2">
+                        <img
+                          src="/static/No%20Cover%20Available"
+                          alt={proj.name}
+                          className="w-8 h-8 rounded object-cover"
+                        />
+                        <span className="text-gray-700">{proj.name}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </form>
+
+            {/* Mobile links */}
             <nav className="flex flex-col items-center space-y-2">
-              <a href="/" className="text-gray-600 hover:text-indigo-600 font-medium py-1">
+              <a
+                href="/"
+                className="text-gray-600 hover:text-indigo-600 font-medium py-1"
+              >
                 Home
               </a>
-              <a href="/community-projects" className="text-gray-600 hover:text-indigo-600 font-medium py-1">
+              <a
+                href="/community-projects"
+                className="text-gray-600 hover:text-indigo-600 font-medium py-1"
+              >
                 Featured
               </a>
-              <a href="/AI-Assistant" className="text-gray-600 hover:text-indigo-600 font-medium py-1">
+              <a
+                href="/AI-Assistant"
+                className="text-gray-600 hover:text-indigo-600 font-medium py-1"
+              >
                 AI
               </a>
               {showMessages && (
-                <a href="/messages" className="text-gray-600 hover:text-indigo-600 font-medium py-1">
+                <a
+                  href="/messages"
+                  className="text-gray-600 hover:text-indigo-600 font-medium py-1"
+                >
                   Messages
                 </a>
               )}
-              <a href="/account" className="text-gray-600 hover:text-indigo-600 font-medium py-1">
+              <a
+                href="/account"
+                className="text-gray-600 hover:text-indigo-600 font-medium py-1"
+              >
                 Dashboard
               </a>
             </nav>
