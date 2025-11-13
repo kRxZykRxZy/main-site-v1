@@ -61,7 +61,7 @@ class MenuBar extends React.Component {
               href="/account"
               className="text-gray-600 hover:text-indigo-600 font-medium transition-colors duration-200"
             >
-              Account
+              Dashboard
             </a>
           </nav>
 
@@ -120,7 +120,7 @@ class MenuBar extends React.Component {
                 href="/account"
                 className="block text-gray-600 hover:text-indigo-600 font-medium py-1"
               >
-                Account
+                Dashboard
               </a>
             </nav>
           </div>
