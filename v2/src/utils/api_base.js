@@ -21,6 +21,9 @@ export async function fetchJSON(endpoint, options = {}) {
  * API functions
  */
 export const API = {
+  getProjects: () =>
+    fetchJSON(`/api/projects`),
+  
   getProjectMeta: (projectId, username = "guest") =>
     fetchJSON(`/api/projects/${projectId}/meta/${username}`),
 
