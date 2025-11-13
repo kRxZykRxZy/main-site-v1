@@ -97,7 +97,7 @@ class MenuBar extends React.Component {
                   >
                     <div className="flex items-center space-x-2">
                       <img
-                        src={proj.image}
+                        src="/static/No%20Cover%20Available"
                         alt={proj.name}
                         className="w-8 h-8 rounded object-cover"
                       />
@@ -115,10 +115,10 @@ class MenuBar extends React.Component {
               Home
             </a>
             <a href="/community-projects" className="text-gray-600 hover:text-indigo-600 font-medium">
-              Community Projects
+              Featured
             </a>
             <a href="/AI-Assistant" className="text-gray-600 hover:text-indigo-600 font-medium">
-              AI Assistant
+              AI
             </a>
             {showMessages && (
               <a href="/messages" className="text-gray-600 hover:text-indigo-600 font-medium">
@@ -154,10 +154,10 @@ class MenuBar extends React.Component {
                 Home
               </a>
               <a href="/community-projects" className="text-gray-600 hover:text-indigo-600 font-medium py-1">
-                Community Projects
+                Featured
               </a>
               <a href="/AI-Assistant" className="text-gray-600 hover:text-indigo-600 font-medium py-1">
-                AI Assistant
+                AI
               </a>
               {showMessages && (
                 <a href="/messages" className="text-gray-600 hover:text-indigo-600 font-medium py-1">
