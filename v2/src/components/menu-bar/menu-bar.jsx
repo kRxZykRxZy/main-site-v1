@@ -55,17 +55,18 @@ class MenuBar extends React.Component {
     return (
       <header className="bg-white shadow-sm py-4 relative z-50">
         <div className="container mx-auto px-4 flex items-center justify-between">
-          {/* Left Section - Logo */}
-          <div className="flex items-center justify-start flex-shrink-0">
-            <a
-              href="/"
-              className="flex items-center space-x-2 text-2xl font-bold text-indigo-600"
-            >
-              <img
-                src="/static/snaplabs_logo.png"
-                alt="SnapLabs Logo"
+          {/* Left Section - SVG Logo */}
+          <div className="flex items-center justify-start flex-shrink-0 space-x-2">
+            <a href="/" className="flex items-center space-x-2 text-2xl font-bold text-indigo-600">
+              {/* Inline SVG Logo */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
                 className="w-8 h-8"
-              />
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 0L24 24H0L12 0z" /> {/* Example placeholder triangle SVG */}
+              </svg>
               <span>SnapLabs</span>
             </a>
           </div>
@@ -89,7 +90,7 @@ class MenuBar extends React.Component {
               Search
             </button>
 
-            {/* Dropdown search results (desktop) */}
+            {/* Dropdown search results */}
             {showDropdown && searchResults.length > 0 && (
               <ul className="absolute left-0 mt-2 w-full bg-white shadow-lg rounded-lg border border-gray-200 max-h-60 overflow-y-auto">
                 {searchResults.map((proj) => (
@@ -116,35 +117,13 @@ class MenuBar extends React.Component {
 
           {/* Right Section - Navigation */}
           <nav className="hidden md:flex space-x-6">
-            <a href="/" className="text-gray-600 hover:text-indigo-600 font-medium">
-              Home
-            </a>
-            <a
-              href="/community-projects"
-              className="text-gray-600 hover:text-indigo-600 font-medium"
-            >
-              Featured
-            </a>
-            <a
-              href="/AI-Assistant"
-              className="text-gray-600 hover:text-indigo-600 font-medium"
-            >
-              AI
-            </a>
+            <a href="/" className="text-gray-600 hover:text-indigo-600 font-medium">Home</a>
+            <a href="/community-projects" className="text-gray-600 hover:text-indigo-600 font-medium">Featured</a>
+            <a href="/AI-Assistant" className="text-gray-600 hover:text-indigo-600 font-medium">AI</a>
             {showMessages && (
-              <a
-                href="/messages"
-                className="text-gray-600 hover:text-indigo-600 font-medium"
-              >
-                Messages
-              </a>
+              <a href="/messages" className="text-gray-600 hover:text-indigo-600 font-medium">Messages</a>
             )}
-            <a
-              href="/account"
-              className="text-gray-600 hover:text-indigo-600 font-medium"
-            >
-              Dashboard
-            </a>
+            <a href="/account" className="text-gray-600 hover:text-indigo-600 font-medium">Dashboard</a>
           </nav>
 
           {/* Mobile Menu Toggle */}
@@ -168,7 +147,7 @@ class MenuBar extends React.Component {
           </button>
         </div>
 
-        {/* Mobile Navigation (with search bar inside dropdown) */}
+        {/* Mobile Navigation */}
         {mobileOpen && (
           <div className="md:hidden bg-white py-2 shadow-md">
             {/* Mobile search */}
@@ -217,38 +196,13 @@ class MenuBar extends React.Component {
 
             {/* Mobile links */}
             <nav className="flex flex-col items-center space-y-2">
-              <a
-                href="/"
-                className="text-gray-600 hover:text-indigo-600 font-medium py-1"
-              >
-                Home
-              </a>
-              <a
-                href="/community-projects"
-                className="text-gray-600 hover:text-indigo-600 font-medium py-1"
-              >
-                Featured
-              </a>
-              <a
-                href="/AI-Assistant"
-                className="text-gray-600 hover:text-indigo-600 font-medium py-1"
-              >
-                AI
-              </a>
+              <a href="/" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Home</a>
+              <a href="/community-projects" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Featured</a>
+              <a href="/AI-Assistant" className="text-gray-600 hover:text-indigo-600 font-medium py-1">AI</a>
               {showMessages && (
-                <a
-                  href="/messages"
-                  className="text-gray-600 hover:text-indigo-600 font-medium py-1"
-                >
-                  Messages
-                </a>
+                <a href="/messages" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Messages</a>
               )}
-              <a
-                href="/account"
-                className="text-gray-600 hover:text-indigo-600 font-medium py-1"
-              >
-                Dashboard
-              </a>
+              <a href="/account" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Dashboard</a>
             </nav>
           </div>
         )}
