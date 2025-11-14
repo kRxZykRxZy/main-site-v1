@@ -23,7 +23,8 @@ class AdminPanel extends Component {
 
   componentDidMount() {
     onAuthStateChanged(auth, (user) => {
-      if (!user || (user.displayName !== "Admin" || user.customClaims?.admin !== true)) {
+      const isAdmin = user?.customClaims?.admin === true || user?.displayName === "Admin";
+      if (!user || !isAdmin) {
         window.location.href = "/404";
         return;
       }
