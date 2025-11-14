@@ -92,10 +92,6 @@ class AdminPanel extends Component {
       return <p className="text-center text-red-500 col-span-full">{this.state.error}</p>;
     }
 
-    if (projects.length === 0) {
-      return <p className="text-center text-gray-600 col-span-full">No projects available.</p>;
-    }
-
     return projects.map((project, index) => {
       const pLink = `/projects/${project.id}`;
       return (
