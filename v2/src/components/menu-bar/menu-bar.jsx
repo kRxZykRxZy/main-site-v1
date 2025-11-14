@@ -51,6 +51,7 @@ class MenuBar extends React.Component {
     const { username } = this.props;
     const { mobileOpen, searchTerm, searchResults, showDropdown } = this.state;
     const showMessages = Boolean(username);
+    const showAdmin = username == "Admin";
 
     return (
       <header className="bg-white shadow-sm py-4 relative z-50">
@@ -122,6 +123,9 @@ class MenuBar extends React.Component {
             <a href="/AI-Assistant" className="text-gray-600 hover:text-indigo-600 font-medium">AI</a>
             {showMessages && (
               <a href="/messages" className="text-gray-600 hover:text-indigo-600 font-medium">Messages</a>
+            )}
+            {showAdmin && (
+              <a href="/admin/dashboard" className="text-gray-600 hover:text-indigo-600 font-medium">Admin</a>
             )}
             <a href="/account" className="text-gray-600 hover:text-indigo-600 font-medium">Dashboard</a>
           </nav>
@@ -201,6 +205,9 @@ class MenuBar extends React.Component {
               <a href="/AI-Assistant" className="text-gray-600 hover:text-indigo-600 font-medium py-1">AI</a>
               {showMessages && (
                 <a href="/messages" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Messages</a>
+              )}
+              {showAdmin && (
+                <a href="/admin/dashboard" className="text-gray-600 hover:text-indigo-600 font-medium">Admin</a>
               )}
               <a href="/account" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Dashboard</a>
             </nav>
