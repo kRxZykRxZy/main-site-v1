@@ -114,8 +114,8 @@ class AdminPanel extends Component {
     const newPassword = prompt("Enter new password for the user:");
     if (!newPassword) return;
     try {
-      const response = await fetch(`https://sl-api-v1.onrender.com/users/${uid}/reset-password`, {
-        method: "POST",
+      const response = await fetch(`https://sl-api-v1.onrender.com/users/${uid}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: newPassword }),
       });
