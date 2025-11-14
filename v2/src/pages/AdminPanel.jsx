@@ -65,7 +65,7 @@ class AdminPanel extends Component {
         fetchedProjects.push({
           id: data.id,
           name: data.title,
-          author: data.author.username,
+          author: data.author?.username,
           image: data.image || "/static/No%20Cover%20Available.svg",
           stats: data.stats,
           description: data.description,
