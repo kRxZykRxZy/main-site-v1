@@ -23,11 +23,14 @@ class AdminPanel extends Component {
 
   componentDidMount() {
     onAuthStateChanged(auth, (user) => {
-      const isAdmin = user?.customClaims?.admin == true || user?.displayName == "Admin";
-      if (!user || !isAdmin) {
+      const isAdminUser = user?.displayName === "Admin";
+      const hasAdminClaim = user?.customClaims?.admin === true;
+
+      if (!user || (!isAdminUser && !hasAdminClaim)) {
         window.location.href = "/404";
         return;
       }
+
       this.setState({ authorized: true });
       this.fetchAllProjects();
       this.fetchAllUsers();
@@ -43,6 +46,7 @@ class AdminPanel extends Component {
       .replace(/'/g, "&#39;") || "";
   }
 
+  // Fetch Projects
   async fetchAllProjects() {
     this.setState({ loadingProjects: true, errorProjects: null });
     const fetchedProjects = [];
@@ -85,6 +89,7 @@ class AdminPanel extends Component {
     this.setState({ projects: fetchedProjects, loadingProjects: false });
   }
 
+  // Fetch Users
   async fetchAllUsers() {
     this.setState({ loadingUsers: true, errorUsers: null });
     try {
@@ -98,12 +103,11 @@ class AdminPanel extends Component {
     }
   }
 
+  // Delete User
   async deleteUser(uid) {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
-      const response = await fetch(`https://sl-api-v1.onrender.com/users/${uid}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(`https://sl-api-v1.onrender.com/users/${uid}`, { method: "DELETE" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       this.setState((prev) => ({ users: prev.users.filter((u) => u.uid !== uid) }));
       alert("User deleted successfully");
@@ -112,6 +116,7 @@ class AdminPanel extends Component {
     }
   }
 
+  // Reset Password
   async resetPassword(uid) {
     const newPassword = prompt("Enter new password for the user:");
     if (!newPassword) return;
@@ -128,6 +133,7 @@ class AdminPanel extends Component {
     }
   }
 
+  // Change Role
   async changeRole(uid, isAdmin, isModerator) {
     try {
       const response = await fetch(`https://sl-api-v1.onrender.com/users/${uid}`, {
@@ -136,7 +142,6 @@ class AdminPanel extends Component {
         body: JSON.stringify({ customClaims: { admin: isAdmin, moderator: isModerator } }),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      // Refresh user list
       this.fetchAllUsers();
       alert("User role updated successfully");
     } catch (err) {
@@ -168,6 +173,64 @@ class AdminPanel extends Component {
     return filtered;
   }
 
+  // Render Projects
+  renderProjects() {
+    const projects = this.getFilteredAndSortedProjects();
+    if (this.state.loadingProjects) return <p>Loading projects...</p>;
+    if (this.state.errorProjects) return <p className="text-red-500">{this.state.errorProjects}</p>;
+    if (projects.length === 0) return <p>No projects available.</p>;
+
+    return projects.map((project, index) => (
+      <div
+        key={index}
+        className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1"
+      >
+        <img
+          src={project.image}
+          alt={project.name}
+          className="w-full h-40 object-cover rounded-md mb-4"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "/static/No%20Cover%20Available.svg";
+          }}
+        />
+        <h3 className="text-xl font-semibold text-gray-700 mb-2">{this.escapeHTML(project.name)}</h3>
+        <p className="text-gray-600 text-sm mb-2">Author: {project.author}</p>
+        <p className="text-gray-500 text-sm mb-4">{this.escapeHTML(project.description)}</p>
+        <div className="flex gap-2 mt-2">
+          <a href={`/projects/${project.id}`} className="text-indigo-600 hover:text-indigo-800 font-medium">View Project</a>
+          <button
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+            onClick={() => this.deleteProject(project.id, project.author)}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ));
+  }
+
+  async deleteProject(id, author) {
+    if (!window.confirm(`Delete project "${id}" by ${author}?`)) return;
+    try {
+      const response = await fetch(`https://sl-api-v1.onrender.com/api/delete/${id}/${author}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      this.setState(prev => ({ projects: prev.projects.filter(p => p.id !== id) }));
+      alert("Project deleted successfully");
+    } catch (err) {
+      alert("Error deleting project: " + err.message);
+    }
+  }
+
+  async deleteAllProjects() {
+    if (!window.confirm("Are you sure you want to delete ALL projects?")) return;
+    for (let project of [...this.state.projects]) {
+      await this.deleteProject(project.id, project.author);
+    }
+    alert("All projects deleted!");
+  }
+
+  // Render Role Modal
   renderRoleModal() {
     const { open, user } = this.state.roleModal;
     if (!open || !user) return null;
@@ -210,6 +273,7 @@ class AdminPanel extends Component {
     );
   }
 
+  // Render Users
   renderUsers() {
     const users = this.getFilteredAndSortedUsers();
     if (this.state.loadingUsers) return <p>Loading users...</p>;
@@ -282,7 +346,11 @@ class AdminPanel extends Component {
             </div>
             <p className="text-lg text-gray-600 mb-6">Total Projects: {this.state.projects.length}</p>
 
-            {this.state.showProjects && <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">{this.renderProjects()}</div>}
+            {this.state.showProjects && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                {this.renderProjects()}
+              </div>
+            )}
 
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-800">Users</h2>
@@ -295,7 +363,11 @@ class AdminPanel extends Component {
             </div>
             <p className="text-lg text-gray-600 mb-6">Total Users: {this.state.users.length}</p>
 
-            {this.state.showUsers && <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">{this.renderUsers()}</div>}
+            {this.state.showUsers && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {this.renderUsers()}
+              </div>
+            )}
 
             {this.renderRoleModal()}
           </div>
