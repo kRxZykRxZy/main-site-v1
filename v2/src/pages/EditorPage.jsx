@@ -65,7 +65,7 @@ class EditorPage extends React.Component {
     }
 
     // --- Load project (code or blocks)
-    const projectRes = await fetch(`/api/project/${id}`);
+    const projectRes = await fetch(`https://sl-api-v1.onrender.com/api/project/${id}`);
     const projectJson = await projectRes.json();
 
     const projectType = projectJson.type; // "code" or "blocks"
@@ -185,7 +185,7 @@ class EditorPage extends React.Component {
           files[file] = this.editorInstances[file].getValue();
         });
 
-        await fetch(`/api/project/${projectId}/save`, {
+        await fetch(`https://sl-api-v1.onrender.com/api/project/${projectId}/save`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ files })
