@@ -142,7 +142,7 @@ class AdminPanel extends Component {
         body: JSON.stringify({ customClaims: { admin: isAdmin, moderator: isModerator } }),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      this.fetchAllUsers();
+      window.location.reload();
       alert("User role updated successfully");
     } catch (err) {
       alert("Error updating role: " + err.message);
