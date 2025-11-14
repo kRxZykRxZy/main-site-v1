@@ -1,6 +1,5 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -9,7 +8,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyDeHzzscjrfH3QEyS9cpFWvUdvukfIlvPM",
   authDomain: "sigjeof.firebaseapp.com",
   projectId: "sigjeof",
-  storageBucket: "sigjeof.appspot.com", // fixed: should be *.appspot.com
+  storageBucket: "sigjeof.appspot.com",
   messagingSenderId: "799693717051",
   appId: "1:799693717051:web:723b3a412422f7cc5ae61e",
   measurementId: "G-JRWEJZSGY1",
@@ -24,8 +23,8 @@ isSupported().then((supported) => {
 });
 
 // Initialize Firebase services
-export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
+// Do not export `auth` here — code should use firebase/auth and onAuthStateChanged directly
 export default app;
