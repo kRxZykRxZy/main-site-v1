@@ -48,7 +48,15 @@ class AdminPanel extends Component {
         }
 
         const data = await response.json();
-        fetchedProjects.push({ id, ...data });
+        fetchedProjects.push({
+          id: data.id,
+          name: data.title,
+          author: data.author.username,
+          image: data.image || "/static/No%20Cover%20Available.svg",
+          stats: data.stats,
+          description: data.description
+        });
+
         consecutiveErrors = 0;
         id++;
       } catch (err) {
@@ -92,6 +100,10 @@ class AdminPanel extends Component {
       return <p className="text-center text-red-500 col-span-full">{this.state.error}</p>;
     }
 
+    if (projects.length === 0) {
+      return <p className="text-center text-gray-600 col-span-full">No projects available.</p>;
+    }
+
     return projects.map((project, index) => {
       const pLink = `/projects/${project.id}`;
       return (
@@ -100,7 +112,7 @@ class AdminPanel extends Component {
           className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1"
         >
           <img
-            src={`https://sl-api-v1.onrender.com${project.image || "/static/No%20Cover%20Available.svg"}`}
+            src={`https://sl-api-v1.onrender.com${project.image}`}
             alt={`${project.name} thumbnail`}
             className="w-full h-40 object-cover rounded-md mb-4"
             onError={(e) => {
@@ -109,7 +121,9 @@ class AdminPanel extends Component {
             }}
           />
           <h3 className="text-xl font-semibold text-gray-700 mb-2">{this.escapeHTML(project.name)}</h3>
-          <p className="text-gray-600 text-sm mb-4">Author: {project.author}</p>
+          <p className="text-gray-600 text-sm mb-2">Author: {project.author}</p>
+          <p className="text-gray-600 text-sm mb-4">Views: {project.stats.views} | Loves: {project.stats.loves} | Favorites: {project.stats.favorites} | Remixes: {project.stats.remixes}</p>
+          <p className="text-gray-500 text-sm mb-4">{this.escapeHTML(project.description)}</p>
           <a
             href={pLink}
             className="text-indigo-600 hover:text-indigo-800 font-medium inline-flex items-center"
