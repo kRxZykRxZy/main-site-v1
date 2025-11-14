@@ -3,7 +3,6 @@ import { useParams, Navigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 
-// Wrapper to pass `id` from params to class component
 export default function EditorPageWrapper() {
   const { id } = useParams();
   return <EditorPage id={id} />;
@@ -12,106 +11,246 @@ export default function EditorPageWrapper() {
 class EditorPage extends React.Component {
   constructor(props) {
     super(props);
-    this.iframeRef = React.createRef();
     this.state = {
       redirect: null,
       username: null,
+      projectType: null,
+      codeFiles: {},
+      loaded: false
     };
+
+    this.editorInstances = {}; // { filename: monacoEditor }
+    this.activeFile = "index.html";
+
+    this.editorRef = React.createRef();
+    this.previewRef = React.createRef();
   }
 
   componentDidMount() {
     this.init();
   }
 
+  componentWillUnmount() {
+    if (this.autoSaveInterval) clearInterval(this.autoSaveInterval);
+  }
+
   async init() {
     const { id } = this.props;
 
-    // Wait for Firebase auth state to resolve
+    // Resolve user
     const username = await new Promise((resolve) => {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
-        unsubscribe(); // stop listening once we have the user
-        if (user) {
-          resolve(user.displayName || user.email || null);
-        } else {
-          resolve(null);
-        }
+        unsubscribe();
+        resolve(user ? user.displayName || user.email : null);
       });
     });
 
     this.setState({ username });
 
-    const SECURE_ID = localStorage.getItem("SECURE_ID");
-
-    // Redirect if no username and no project id
     if (!username && id == 0) {
       this.setState({ redirect: "/account" });
       return;
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const remix = params.get("remix");
-
-    // Remix project flow
-    if (remix && username) {
-      try {
-        const res = await fetch(`https://sl-api-v1.onrender.com/remix/${remix}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ remixId: remix, username }),
-        });
-        const json = await res.json();
-        this.setState({ redirect: `/projects/${json.id}` });
-        return;
-      } catch (err) {
-        console.error("Remix error:", err);
-      }
+    // --- New project flow (unchanged)
+    if (id == 0 && username) {
+      const res = await fetch("https://sl-api-v1.onrender.com/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username })
+      });
+      const json = await res.json();
+      this.setState({ redirect: `/projects/${json.id}` });
+      return;
     }
 
-    // New project flow
-    if (id == 0 && username && !remix) {
-      try {
-        const res = await fetch("https://sl-api-v1.onrender.com/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: username }),
-        });
-        const data = await res.json();
-        if (data.error || data.message) {
-          console.log(data.error || data.message);
-        } 
-        if (data?.id) {
-          localStorage.setItem("new-project", "true");
-          this.setState({ redirect: `/projects/${data.id}` });
-          return;
-        }
-      } catch (err) {
-        alert(err);
-        console.error("Error creating new project:", err);
-      }
+    // --- Load project (code or blocks)
+    const projectRes = await fetch(`/api/project/${id}`);
+    const projectJson = await projectRes.json();
+
+    const projectType = projectJson.type; // "code" or "blocks"
+
+    if (projectType === "blocks") {
+      this.setState({ projectType, loaded: true });
+      return;
     }
 
-    // Set iframe src
-    const hash = id || "0";
-    const baseUrl = "https://myscratchblocks.github.io/scratch-gui";
-    const finalUrl = `${baseUrl}#${hash}?username=${username || 'test'}`;
+    // --- Code project ---
+    const codeFiles = projectJson.files || {
+      "index.html": "<h1>Hello</h1>",
+      "style.css": "body{font-family:sans-serif;}",
+      "script.js": "console.log('hi')"
+    };
 
-    if (this.iframeRef.current) {
-      this.iframeRef.current.src = finalUrl;
-    }
+    this.setState({ projectType: "code", codeFiles, loaded: true });
+
+    await this.loadMonaco();
+    this.createEditors(codeFiles);
+    this.startAutoSave(id);
+    this.updatePreview();
   }
 
+  //------------------------------------
+  // LOAD MONACO EDITOR
+  //------------------------------------
+  loadMonaco() {
+    return new Promise((resolve) => {
+      if (window.monaco) return resolve();
+
+      const loader = document.createElement("script");
+      loader.src = "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js";
+      loader.onload = () => {
+        window.require.config({
+          paths: {
+            vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs"
+          }
+        });
+
+        window.require(["vs/editor/editor.main"], () => resolve());
+      };
+      document.body.appendChild(loader);
+    });
+  }
+
+  //------------------------------------
+  // CREATE MONACO INSTANCES
+  //------------------------------------
+  createEditors(files) {
+    Object.keys(files).forEach((file) => {
+      this.editorInstances[file] = window.monaco.editor.create(this.editorRef.current, {
+        value: files[file],
+        language: file.endsWith(".html")
+          ? "html"
+          : file.endsWith(".css")
+          ? "css"
+          : "javascript",
+        theme: "vs-dark"
+      });
+
+      this.editorInstances[file].onDidChangeModelContent(() => {
+        this.updatePreview();
+      });
+    });
+
+    this.showFile("index.html");
+  }
+
+  //------------------------------------
+  // SWITCH BETWEEN FILES
+  //------------------------------------
+  showFile(filename) {
+    this.activeFile = filename;
+
+    Object.keys(this.editorInstances).forEach((file) => {
+      this.editorInstances[file].getDomNode().style.display =
+        file === filename ? "block" : "none";
+    });
+  }
+
+  //------------------------------------
+  // UPDATE IFRAME PREVIEW
+  //------------------------------------
+  updatePreview() {
+    if (!this.previewRef.current) return;
+
+    const html = this.editorInstances["index.html"].getValue();
+    const css = this.editorInstances["style.css"].getValue();
+    const js = this.editorInstances["script.js"].getValue();
+
+    const fullOutput = `
+      <html>
+        <head>
+          <style>${css}</style>
+        </head>
+        <body>
+          ${html}
+          <script>${js}<\/script>
+        </body>
+      </html>
+    `;
+
+    this.previewRef.current.srcdoc = fullOutput;
+  }
+
+  //------------------------------------
+  // AUTO SAVE (EVERY 3 SECONDS)
+  //------------------------------------
+  startAutoSave(projectId) {
+    if (this.autoSaveInterval) clearInterval(this.autoSaveInterval);
+
+    this.autoSaveInterval = setInterval(async () => {
+      try {
+        const files = {};
+        Object.keys(this.editorInstances).forEach((file) => {
+          files[file] = this.editorInstances[file].getValue();
+        });
+
+        await fetch(`/api/project/${projectId}/save`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ files })
+        });
+
+        console.log("Auto-saved");
+      } catch (e) {
+        console.error("Auto-save failed:", e);
+      }
+    }, 3000);
+  }
+
+  //------------------------------------
+  // RENDER
+  //------------------------------------
   render() {
-    const { redirect } = this.state;
-    if (redirect) {
-      return <Navigate to={redirect} replace />;
+    const { redirect, loaded, projectType } = this.state;
+    const id = this.props.id;
+
+    if (redirect) return <Navigate to={redirect} replace />;
+    if (!loaded) return <div>Loading...</div>;
+
+    // ---------------- BLOCKS ----------------
+    if (projectType === "blocks") {
+      const baseUrl = "https://myscratchblocks.github.io/scratch-gui";
+      const finalUrl = `${baseUrl}#${id}?username=${this.state.username || "test"}`;
+
+      return (
+        <iframe
+          src={finalUrl}
+          style={{ width: "100vw", height: "100vh", border: "none" }}
+        />
+      );
     }
 
+    // ---------------- CODE ----------------
     return (
-      <div style={{ height: "100vh", width: "100vw", margin: 0, padding: 0 }}>
+      <div style={{ display: "flex", height: "100vh", width: "100vw" }}>
+        {/* LEFT: File List */}
+        <div style={{ width: "200px", background: "#222", color: "white", padding: "10px" }}>
+          {["index.html", "style.css", "script.js"].map((file) => (
+            <div
+              key={file}
+              onClick={() => this.showFile(file)}
+              style={{
+                padding: "8px",
+                cursor: "pointer",
+                background: this.activeFile === file ? "#444" : "transparent"
+              }}
+            >
+              {file}
+            </div>
+          ))}
+        </div>
+
+        {/* CENTER: Editor */}
+        <div
+          ref={this.editorRef}
+          style={{ flex: 1, height: "100vh", position: "relative" }}
+        ></div>
+
+        {/* RIGHT: Preview */}
         <iframe
-          ref={this.iframeRef}
-          title="SnapLabs Editor"
-          style={{ border: "none", width: "100%", height: "100%" }}
+          ref={this.previewRef}
+          style={{ width: "40vw", height: "100vh", border: "none" }}
         />
       </div>
     );
