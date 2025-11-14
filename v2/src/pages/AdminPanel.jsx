@@ -15,6 +15,8 @@ class AdminPanel extends Component {
       search: "",
       sort: "az",
       authorized: false,
+      showUsers: true,
+      showProjects: true,
     };
   }
 
@@ -41,7 +43,6 @@ class AdminPanel extends Component {
 
   async fetchAllProjects() {
     this.setState({ loadingProjects: true, errorProjects: null });
-
     const fetchedProjects = [];
     let consecutiveErrors = 0;
     let id = 1;
@@ -84,7 +85,6 @@ class AdminPanel extends Component {
 
   async fetchAllUsers() {
     this.setState({ loadingUsers: true, errorUsers: null });
-
     try {
       const response = await fetch("https://sl-api-v1.onrender.com/users/");
       if (!response.ok) throw new Error(`HTTP error ${response.status}`);
@@ -145,6 +145,27 @@ class AdminPanel extends Component {
     }
   }
 
+  async deleteProject(id, author) {
+    if (!window.confirm(`Delete project "${id}" by ${author}?`)) return;
+    try {
+      const url = `https://sl-api-v1.onrender.com/api/delete/${id}/${author}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      this.setState((prev) => ({ projects: prev.projects.filter((p) => p.id !== id) }));
+      alert("Project deleted successfully");
+    } catch (err) {
+      alert("Error deleting project: " + err.message);
+    }
+  }
+
+  async deleteAllProjects() {
+    if (!window.confirm("Are you sure you want to delete ALL projects?")) return;
+    for (let project of [...this.state.projects]) {
+      await this.deleteProject(project.id, project.author);
+    }
+    alert("All projects deleted!");
+  }
+
   getFilteredAndSortedProjects() {
     const { projects, search, sort } = this.state;
     let filtered = projects.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
@@ -187,9 +208,17 @@ class AdminPanel extends Component {
           Views: {project.stats.views} | Loves: {project.stats.loves} | Favorites: {project.stats.favorites} | Remixes: {project.stats.remixes}
         </p>
         <p className="text-gray-500 text-sm mb-4">{this.escapeHTML(project.description)}</p>
-        <a href={`/projects/${project.id}`} className="text-indigo-600 hover:text-indigo-800 font-medium inline-flex items-center">
-          View Project
-        </a>
+        <div className="flex gap-2 mt-2">
+          <a href={`/projects/${project.id}`} className="text-indigo-600 hover:text-indigo-800 font-medium inline-flex items-center">
+            View Project
+          </a>
+          <button
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+            onClick={() => this.deleteProject(project.id, project.author)}
+          >
+            Delete
+          </button>
+        </div>
       </div>
     ));
   }
@@ -239,15 +268,39 @@ class AdminPanel extends Component {
       <div className="antialiased font-inter bg-gray-50 text-gray-800">
         <section className="py-16 px-4 bg-gray-100">
           <div className="container mx-auto max-w-6xl text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-2 text-gray-800">Admin Projects</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-800">Admin Projects</h2>
+              <div className="flex gap-2">
+                <button
+                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                  onClick={() => this.deleteAllProjects()}
+                >
+                  Delete All Projects
+                </button>
+                <button
+                  className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+                  onClick={() => this.setState((prev) => ({ showProjects: !prev.showProjects }))}
+                >
+                  {this.state.showProjects ? "Hide Projects" : "Show Projects"}
+                </button>
+              </div>
+            </div>
             <p className="text-lg text-gray-600 mb-6">Total Projects: {this.state.projects.length}</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">{this.renderProjects()}</div>
+            {this.state.showProjects && <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">{this.renderProjects()}</div>}
 
-            <h2 className="text-3xl sm:text-4xl font-bold mb-2 text-gray-800">Users</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-800">Users</h2>
+              <button
+                className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+                onClick={() => this.setState((prev) => ({ showUsers: !prev.showUsers }))}
+              >
+                {this.state.showUsers ? "Hide Users" : "Show Users"}
+              </button>
+            </div>
             <p className="text-lg text-gray-600 mb-6">Total Users: {this.state.users.length}</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">{this.renderUsers()}</div>
+            {this.state.showUsers && <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">{this.renderUsers()}</div>}
           </div>
         </section>
       </div>
