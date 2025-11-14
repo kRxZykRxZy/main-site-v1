@@ -30,6 +30,15 @@ class AdminPanel extends Component {
     });
   }
 
+  escapeHTML(str) {
+    return str
+      ?.replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#39;") || "";
+  }
+
   async fetchAllProjects() {
     this.setState({ loadingProjects: true, errorProjects: null });
 
@@ -55,7 +64,7 @@ class AdminPanel extends Component {
         fetchedProjects.push({
           id: data.id,
           name: data.title,
-          author: data.author.username,
+          author: data.author.displayName,
           image: data.image || "/static/No%20Cover%20Available.svg",
           stats: data.stats,
           description: data.description,
@@ -87,25 +96,25 @@ class AdminPanel extends Component {
     }
   }
 
-  async deleteUser(userId) {
+  async deleteUser(uid) {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
-      const response = await fetch(`https://sl-api-v1.onrender.com/users/${userId}`, {
+      const response = await fetch(`https://sl-api-v1.onrender.com/users/${uid}`, {
         method: "DELETE",
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      this.setState((prev) => ({ users: prev.users.filter((u) => u.id !== userId) }));
+      this.setState((prev) => ({ users: prev.users.filter((u) => u.uid !== uid) }));
       alert("User deleted successfully");
     } catch (err) {
       alert("Error deleting user: " + err.message);
     }
   }
 
-  async resetPassword(userId) {
+  async resetPassword(uid) {
     const newPassword = prompt("Enter new password for the user:");
     if (!newPassword) return;
     try {
-      const response = await fetch(`https://sl-api-v1.onrender.com/users/${userId}/reset-password`, {
+      const response = await fetch(`https://sl-api-v1.onrender.com/users/${uid}/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: newPassword }),
@@ -117,32 +126,23 @@ class AdminPanel extends Component {
     }
   }
 
-  async updateEmail(userId) {
+  async updateEmail(uid) {
     const newEmail = prompt("Enter new email for the user:");
     if (!newEmail) return;
     try {
-      const response = await fetch(`https://sl-api-v1.onrender.com/users/${userId}`, {
+      const response = await fetch(`https://sl-api-v1.onrender.com/users/${uid}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: newEmail }),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       this.setState((prev) => ({
-        users: prev.users.map((u) => (u.id === userId ? { ...u, email: newEmail } : u)),
+        users: prev.users.map((u) => (u.uid === uid ? { ...u, email: newEmail } : u)),
       }));
       alert("Email updated successfully");
     } catch (err) {
       alert("Error updating email: " + err.message);
     }
-  }
-
-  escapeHTML(str) {
-    return str
-      ?.replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;") || "";
   }
 
   getFilteredAndSortedProjects() {
@@ -155,9 +155,9 @@ class AdminPanel extends Component {
 
   getFilteredAndSortedUsers() {
     const { users, search, sort } = this.state;
-    let filtered = users.filter((u) => u.username.toLowerCase().includes(search.toLowerCase()));
-    if (sort === "az") filtered.sort((a, b) => a.username.localeCompare(b.username));
-    if (sort === "za") filtered.sort((a, b) => b.username.localeCompare(a.username));
+    let filtered = users.filter((u) => u.displayName.toLowerCase().includes(search.toLowerCase()));
+    if (sort === "az") filtered.sort((a, b) => a.displayName.localeCompare(b.displayName));
+    if (sort === "za") filtered.sort((a, b) => b.displayName.localeCompare(a.displayName));
     return filtered;
   }
 
@@ -205,25 +205,25 @@ class AdminPanel extends Component {
         key={index}
         className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1"
       >
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">{this.escapeHTML(user.username)}</h3>
-        <p className="text-gray-600 text-sm mb-2">ID: {user.id}</p>
+        <h3 className="text-xl font-semibold text-gray-700 mb-2">{this.escapeHTML(user.displayName)}</h3>
+        <p className="text-gray-600 text-sm mb-2">UID: {user.uid}</p>
         <p className="text-gray-600 text-sm mb-2">Email: {user.email || "N/A"}</p>
         <div className="flex gap-2 mt-2">
           <button
             className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-            onClick={() => this.deleteUser(user.id)}
+            onClick={() => this.deleteUser(user.uid)}
           >
             Delete User
           </button>
           <button
             className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-            onClick={() => this.resetPassword(user.id)}
+            onClick={() => this.resetPassword(user.uid)}
           >
             Reset Password
           </button>
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            onClick={() => this.updateEmail(user.id)}
+            onClick={() => this.updateEmail(user.uid)}
           >
             Update Email
           </button>
