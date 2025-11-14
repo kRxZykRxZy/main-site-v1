@@ -8,6 +8,7 @@ import Ai from "./pages/AIAssistant";
 import Cp from "./pages/CommunityProjects";
 import MyStuff from "./pages/MyStuff";
 import Search from "./pages/SearchPage";
+import AdminPanel from "./pages/AdminPanel";
 import Editor from "./pages/EditorFrame";
 import Spinner from "./components/spinner/workspace";
 import { onAuthStateChanged } from "firebase/auth";
@@ -56,6 +57,7 @@ const App = () => {
         <Route path="/community-projects" element={<Cp />} />
         <Route path="/AI-Assistant" element={<Ai />} />
         <Route path="/dashboard" element={<MyStuff />} />
+        <Route path="/admin/dashboard" element={<AdminPanel />} />
         <Route
           path="*"
           element={
