@@ -3,7 +3,7 @@ import { getAnalytics, isSupported } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
-import { initializeAi, getAiLogic } from "firebase/ai";
+import { getAI, GoogleAIBackend } from "firebase/ai";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -18,7 +18,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-initialiseAi(app);
 
 // Initialize Analytics safely (only in browsers)
 isSupported().then((supported) => {
@@ -29,7 +28,7 @@ isSupported().then((supported) => {
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const auth = getAuth(app);
-export const aiLogic = getAiLogic(app);
+export const aiLogic = getAI(app, { backend: new GoogleAIBackend() });
 
 // Do not export `auth` here — code should use firebase/auth and onAuthStateChanged directly
 export default app;
