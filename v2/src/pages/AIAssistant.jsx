@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { aiLogic } from "../firebaseConfig.js";
 
 const AiAssistant = () => {
   const [projectIdeaInput, setProjectIdeaInput] = useState("");
@@ -22,41 +23,16 @@ const AiAssistant = () => {
     setLoading(true);
 
     try {
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-
-      if (!apiKey) {
-        throw new Error("OpenAI API key not found. Make sure VITE_OPENAI_API_KEY is set.");
-      }
-
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [
-            {
-              role: "system",
-              content:
-                "You are an AI Assistant designed to help people with coding in the SnapLabs Scratch Mod.",
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          temperature: 0.7,
-        }),
+      // 🚀 Firebase AI Logic call (Gemini)
+      const result = await aiLogic.run("assistant", {
+        user_input: prompt,
       });
 
-      const data = await response.json();
-      const text = data?.choices?.[0]?.message?.content;
-
-      setProjectIdeaOutput(text || "Failed to get a response from the AI Assistant.");
+      setProjectIdeaOutput(
+        result?.output || "The AI Assistant did not return a response."
+      );
     } catch (error) {
-      console.error("OpenAI API error:", error);
+      console.error("Firebase AI error:", error);
       setProjectIdeaOutput(
         "Failed to contact the AI Assistant. Check your connection and try again."
       );
@@ -80,11 +56,12 @@ const AiAssistant = () => {
       {/* AI Assistant Section */}
       <section className="bg-white p-6 rounded-lg shadow-md w-full max-w-3xl mt-6">
         <h2 className="text-3xl font-bold mb-4 text-gray-800 text-center">
-          ✨ Coding Assistant (powered by AI) ✨
+          ✨ Coding Assistant (powered by Firebase AI) ✨
         </h2>
         <p className="text-gray-600 mb-6 text-center">
           Ask the AI Assistant for help with SnapLabs coding, debugging, or ideas.
         </p>
+
         <textarea
           value={projectIdeaInput}
           onChange={(e) => setProjectIdeaInput(e.target.value)}
@@ -97,6 +74,7 @@ const AiAssistant = () => {
           placeholder="e.g., 'How do I code this: [enter coding problem]'"
           className="w-full p-4 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 mb-4 h-32 resize-y"
         />
+
         <button
           onClick={handleSendMessage}
           disabled={loading}
@@ -109,6 +87,7 @@ const AiAssistant = () => {
             <span className="ml-2 inline-block w-6 h-6 border-4 border-white border-t-blue-500 rounded-full animate-spin"></span>
           )}
         </button>
+
         <div className="mt-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-md text-left whitespace-pre-wrap">
           {projectIdeaOutput}
         </div>
