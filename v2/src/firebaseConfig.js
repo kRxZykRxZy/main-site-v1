@@ -3,6 +3,7 @@ import { getAnalytics, isSupported } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
+import { getLogic } from "firebase/ai";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -27,6 +28,7 @@ isSupported().then((supported) => {
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const auth = getAuth(app);
+export const aiLogic = getLogic(app);
 
 // Do not export `auth` here — code should use firebase/auth and onAuthStateChanged directly
 export default app;
