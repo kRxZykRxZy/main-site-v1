@@ -30,8 +30,9 @@ export async function fetchJSON(endpoint, options = {}, uid = null) {
  */
 export async function getCurrentUid() {
   return new Promise((resolve) => {
-    onAuthStateChanged(auth, (user) => {
-      resolve(user?.uid || null);
+    onAuthStateChanged(auth, async (user) => {
+      const id = await user?.getIdToken();
+      resolve(id || null);
     });
   });
 }
