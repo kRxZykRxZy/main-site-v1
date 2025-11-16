@@ -39,9 +39,16 @@ class EditorPage extends React.Component {
 
     // Resolve user
     const username = await new Promise((resolve) => {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
         unsubscribe();
         resolve(user ? user.displayName || user.email : null);
+      });
+    });
+    const token = await new Promise((resolve) => {
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        unsubscribe();
+        const id = await user?.getIdToken();
+        resolve(id);
       });
     });
 
@@ -56,7 +63,10 @@ class EditorPage extends React.Component {
     if (id == 0 && username) {
       const res = await fetch("https://sl-api-v1.onrender.com/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json", 
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ username })
       });
       const json = await res.json();
