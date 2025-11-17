@@ -23,7 +23,7 @@ const App = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUsername(user.displayName || user.email || null);
-        setAdmin(user.customClaims.isAdmin || false);
+        setAdmin(user.customClaims.admin || false);
       } else {
         setUsername(null);
       }
