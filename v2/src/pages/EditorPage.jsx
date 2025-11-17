@@ -220,7 +220,7 @@ class EditorPage extends React.Component {
 
     // ---------------- BLOCKS ----------------
     if (true) {
-      const baseUrl = "https://myscratchblocks.github.io/scratch-gui";
+      const baseUrl = "https://myscratchblocks.github.io/scratch-gui/editor.html";
       const finalUrl = `${baseUrl}?username=${this.state.username || "test"}#${id}`;
 
       return (
