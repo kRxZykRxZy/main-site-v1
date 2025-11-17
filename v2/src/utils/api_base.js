@@ -84,6 +84,13 @@ export const API = {
     }, uid);
   },
 
+  deleteComment: async (projectId, commentId) => {
+    const uid = await getCurrentUid();
+    return fetchJSON(`/${projectId}/comments/${commentId}`, {
+      method: "DELETE",
+    }, uid);
+  },
+  
   postReply: async (projectId, commentId, text, username) => {
     const uid = await getCurrentUid();
     return fetchJSON(`/${projectId}/comments/${commentId}/reply`, {
