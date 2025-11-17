@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
 
 export default defineConfig({
   server: {
@@ -11,18 +10,18 @@ export default defineConfig({
   build: {
     outDir: "dist",
     sourcemap: true,
-    chunkSizeWarningLimit: 90,
+
+    minify: false,               // Do NOT minify code
+    chunkSizeWarningLimit: 90,   // Warn for chunks > 90KB
 
     rollupOptions: {
       output: {
+        // Split every dependency into its own chunk
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            // Split each package → its own chunk
-            const parts = id
-              .split("node_modules/")[1]
-              .split("/");
-
-            // Scoped packages (e.g., @firebase/app)
+            const parts = id.split("node_modules/")[1].split("/");
+            
+            // Handle scoped packages like @firebase/app
             if (parts[0].startsWith("@")) {
               return `${parts[0]}/${parts[1]}`;
             }
