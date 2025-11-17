@@ -213,7 +213,7 @@ class AdminPanel extends Component {
   async deleteProject(id, author) {
     if (!window.confirm(`Delete project "${id}" by ${author}?`)) return;
     try {
-      const response = await fetch(`https://sl-api-v1.onrender.com/api/delete/${id}/${author}`);
+      const response = await fetch(`https://sl-api-v1.onrender.com/api/delete/${id}`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       this.setState(prev => ({ projects: prev.projects.filter(p => p.id !== id) }));
       alert("Project deleted successfully");
