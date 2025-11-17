@@ -55,6 +55,20 @@ const ProjectPage = ({ username: propUsername }) => {
     }
   };
 
+  /** --- Handle comment deletion --- **/
+  const handleCommentDeleted = (deletedId) => {
+    // Remove comment or reply from state recursively
+    const removeById = (items, id) => {
+      return items
+        .filter(item => item.id !== id)
+        .map(item => ({
+          ...item,
+          replies: item.replies ? removeById(item.replies, id) : []
+        }));
+    };
+    setComments(prev => removeById(prev, deletedId));
+  };
+
   /** --- Initial load and post view --- **/
   useEffect(() => {
     if (!projectId) return;
@@ -125,7 +139,12 @@ const ProjectPage = ({ username: propUsername }) => {
         {loadingComments ? (
           <LoadingSpinner />
         ) : (
-          <CommentList comments={comments} projectId={projectId} username={currentUsername} />
+          <CommentList
+            comments={comments}
+            projectId={projectId}
+            username={currentUsername}
+            onCommentDeleted={handleCommentDeleted} // pass deletion callback
+          />
         )}
       </div>
     </div>
