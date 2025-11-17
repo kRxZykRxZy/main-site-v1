@@ -61,6 +61,8 @@ class EditorPage extends React.Component {
 
     // --- New project flow (unchanged)
     if (id == 0 && username) {
+      const headers = {
+        "Content-Type":
       const res = await fetch("https://sl-api-v1.onrender.com/", {
         method: "POST",
         headers: { 
@@ -219,9 +221,9 @@ class EditorPage extends React.Component {
     if (!loaded) return <div>Loading...</div>;
 
     // ---------------- BLOCKS ----------------
-    if (projectType === "blocks") {
+    if (true) {
       const baseUrl = "https://myscratchblocks.github.io/scratch-gui";
-      const finalUrl = `${baseUrl}#${id}?username=${this.state.username || "test"}`;
+      const finalUrl = `${baseUrl}?username=${this.state.username || "test"}#${id}`;
 
       return (
         <iframe
