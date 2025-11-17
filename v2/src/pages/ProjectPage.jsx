@@ -25,7 +25,7 @@ import LoadingSpinner from "../components/layout/LoadingSpinner";
 
 import { API } from "../utils/api_base";
 
-const ProjectPage = ({ username: propUsername }) => {
+const ProjectPage = ({ username: propUsername, isAdmin }) => {
   const { id: projectId } = useParams();
   const [projectMeta, setProjectMeta] = useState(null);
   const [comments, setComments] = useState([]);
@@ -34,7 +34,7 @@ const ProjectPage = ({ username: propUsername }) => {
   const [error, setError] = useState(null);
 
   const currentUsername = propUsername;
-  const isAuthor = projectMeta?.author?.username === currentUsername;
+  const isAuthor = isAdmin || projectMeta?.author?.username === currentUsername;
 
   /** --- Fetch Project Meta --- **/
   const loadProjectMeta = async () => {
