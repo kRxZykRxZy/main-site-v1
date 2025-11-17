@@ -59,7 +59,11 @@ class EditorPage extends React.Component {
         body: JSON.stringify({ username })
       });
       const json = await res.json();
-      this.setState({ redirect: `/projects/${json.id}` });
+      if (json.message) {
+        alert(json.message);
+      } else {
+        this.setState({ redirect: `/projects/${json.id}` });
+      }
       return;
     }
 
