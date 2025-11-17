@@ -53,6 +53,10 @@ class MenuBar extends React.Component {
     const showMessages = Boolean(username);
     const showAdmin = username == "Admin";
 
+    if (typeof window !== "undefined" && window.location.pathname.includes("editor")) {
+      return null;
+    }
+
     return (
       <header className="bg-white shadow-sm py-4 relative z-50">
         <div className="container mx-auto px-4 flex items-center justify-between">
