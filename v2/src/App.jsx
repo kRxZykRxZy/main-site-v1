@@ -16,12 +16,14 @@ import { auth } from "./firebaseConfig"; // import from your firebase setup
 
 const App = () => {
   const [username, setUsername] = useState(null);
+  const [admin, setAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUsername(user.displayName || user.email || null);
+        setAdmin(user.customClaims.isAdmin || false);
       } else {
         setUsername(null);
       }
@@ -49,7 +51,7 @@ const App = () => {
         />
         <Route
           path="/projects/:id"
-          element={<ProjectPage username={username} />}
+          element={<ProjectPage username={username} isAdmin={admin} />}
         />
         <Route path="/search" element={<Search />} />
         <Route path="/account" element={<SiteAuth />} />
