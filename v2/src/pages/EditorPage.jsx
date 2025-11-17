@@ -3,9 +3,10 @@ import { useParams, Navigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 
+// Wrapper to use useParams with a class component
 export default function EditorPageWrapper() {
   const { id } = useParams();
-  return <EditorPage id={id} />;
+  return <EditorPage id={Number(id)} />; // ensure id is a number
 }
 
 class EditorPage extends React.Component {
@@ -35,13 +36,14 @@ class EditorPage extends React.Component {
 
     this.setState({ username });
 
-    if (!username && id == 0) {
+    // Redirect to account if not logged in and id is 0
+    if (!username && id === 0) {
       this.setState({ redirect: "/account" });
       return;
     }
 
-    // Create new project if id = 0
-    if (id == 0 && username) {
+    // Create new project if id = 0 and user exists
+    if (id === 0 && username) {
       const token = await new Promise((resolve) => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
           unsubscribe();
@@ -54,14 +56,14 @@ class EditorPage extends React.Component {
         method: "POST",
         headers: { 
           "Content-Type": "application/json", 
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify({ username })
+        body: JSON.stringify({ username }),
       });
+
       const json = await res.json();
       this.setState({ redirect: `/projects/${json.id}` });
-      }
-      return;
+      return; // stop further execution
     }
 
     this.setState({ loaded: true });
@@ -81,6 +83,7 @@ class EditorPage extends React.Component {
       <iframe
         src={finalUrl}
         style={{ width: "100vw", height: "100vh", border: "none" }}
+        title="Editor"
       />
     );
   }
