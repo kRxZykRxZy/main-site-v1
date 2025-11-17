@@ -61,8 +61,6 @@ class EditorPage extends React.Component {
 
     // --- New project flow (unchanged)
     if (id == 0 && username) {
-      const headers = {
-        "Content-Type":
       const res = await fetch("https://sl-api-v1.onrender.com/", {
         method: "POST",
         headers: { 
