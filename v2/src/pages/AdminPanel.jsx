@@ -1,6 +1,7 @@
 import React, { Component } from "react";
-import { auth } from "../firebaseConfig.js";
+import { auth, db } from "../firebaseConfig.js";
 import { onAuthStateChanged } from "firebase/auth";
+import { collection, addDoc, serverTimestamp, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 class AdminPanel extends Component {
   constructor(props) {
@@ -213,12 +214,12 @@ class AdminPanel extends Component {
   async deleteProject(id, author) {
     if (!window.confirm(`Delete project "${id}" by ${author}?`)) return;
     try {
-      const response = await fetch(`https://sl-api-v1.onrender.com/api/delete/${id}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const snapshot = await getDocs(query(collection(db, "projects"), where("id", "==", id)));
+      snapshot.forEach(docSnap => deleteDoc(doc(db, "projects", docSnap.id)));
       this.setState(prev => ({ projects: prev.projects.filter(p => p.id !== id) }));
       alert("Project deleted successfully");
     } catch (err) {
-      alert("Error deleting project: " + err.message);
+      alert("Error deleting project");
     }
   }
 
