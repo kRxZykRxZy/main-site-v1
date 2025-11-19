@@ -11,6 +11,7 @@ const CommentItem = ({ comment, depth = 0, username, projectId, onCommentDeleted
     try {
       await API.postReply(projectId, comment.id, text, username);
       setShowReplyForm(false);
+      window.location.reload();
     } catch (err) {
       console.error("Reply failed:", err);
     }
