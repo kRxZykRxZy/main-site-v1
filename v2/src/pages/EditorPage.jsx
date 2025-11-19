@@ -1,7 +1,8 @@
 import React from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebaseConfig";
+import { auth, db } from "../firebaseConfig";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 // Wrapper to use useParams with a class component
 export default function EditorPageWrapper() {
@@ -62,8 +63,19 @@ class EditorPage extends React.Component {
       });
 
       const json = await res.json();
-      this.setState({ redirect: `/projects/${json.id}` });
-      return; // stop further execution
+      if (json.id) {
+        this.setState({ redirect: `/projects/${json.id}` });
+        await addDoc(collection(db, "projects"), {
+          title: "Untitled Project", 
+          author: username, 
+          date: new Date().toISOString().split("T")[0],
+          createdAt: serverTimestamp(),
+        });
+        return; // stop further execution
+      } else {
+        alert(json.error);
+        return;
+      }
     }
 
     this.setState({ loaded: true });
