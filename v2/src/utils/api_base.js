@@ -4,6 +4,8 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
+export const BASE_URL = "https://sl-api-v1.onrender.com";
+
 /**
  * Get current Firebase UID helper
  */
