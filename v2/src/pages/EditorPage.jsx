@@ -66,6 +66,7 @@ class EditorPage extends React.Component {
       if (json.id) {
         this.setState({ redirect: `/projects/${json.id}` });
         await addDoc(collection(db, "projects"), {
+          id: json.id,
           title: "Untitled Project", 
           author: username, 
           date: new Date().toISOString().split("T")[0],
