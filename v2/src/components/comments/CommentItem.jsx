@@ -10,8 +10,8 @@ const CommentItem = ({ comment, depth = 0, username, projectId, onCommentDeleted
   const handleReplySubmit = async (text) => {
     try {
       await API.postReply(projectId, comment.id, text, username);
-      setShowReplyForm(false);
       window.location.reload();
+      setShowReplyForm(false);
     } catch (err) {
       console.error("Reply failed:", err);
     }
@@ -22,6 +22,7 @@ const CommentItem = ({ comment, depth = 0, username, projectId, onCommentDeleted
 
     try {
       await API.deleteComment(projectId, comment.id);
+      window.location.reload();
       if (onCommentDeleted) onCommentDeleted(comment.id);
     } catch (err) {
       console.error("Delete failed:", err);
