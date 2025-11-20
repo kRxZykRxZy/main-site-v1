@@ -3,127 +3,147 @@ import { onAuthStateChanged } from "firebase/auth";
 
 export const BASE_URL = "https://sl-api-v1.onrender.com";
 
-/**
- * Fetch JSON helper
- */
-export async function fetchJSON(endpoint, options = {}, uid = null) {
-  try {
-    const headers = options.headers || {};
-    if (uid) {
-      headers["Authorization"] = `Bearer ${uid}`;
-    }
+const API = {
+  /**
+   * Fetch JSON helper
+   */
+  fetch: async function (endpoint, options = {}, uid = null) {
+    try {
+      const headers = options.headers || {};
+      if (uid) headers["Authorization"] = `Bearer ${uid}`;
 
-    const res = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => null);
-      throw new Error(errData?.message || `HTTP ${res.status}`);
-    }
-    return await res.json();
-  } catch (err) {
-    console.error("API fetch error:", err);
-    throw err;
-  }
-}
+      const res = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
 
-/**
- * Get current Firebase UID helper
- */
-export async function getCurrentUid() {
-  return new Promise((resolve) => {
-    onAuthStateChanged(auth, async (user) => {
-      const id = await user?.getIdToken();
-      resolve(id || null);
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        throw new Error(errData?.message || `HTTP ${res.status}`);
+      }
+
+      return await res.json();
+    } catch (err) {
+      console.error("API fetch error:", err);
+      throw err;
+    }
+  },
+
+  /**
+   * Get current Firebase UID
+   */
+  getCurrentUid: async function () {
+    return new Promise((resolve) => {
+      onAuthStateChanged(auth, async (user) => {
+        const token = await user?.getIdToken();
+        resolve(token || null);
+      });
     });
-  });
-}
-
-/**
- * API functions
- */
-export const API = {
-  getProjects: async () => {
-    const uid = await getCurrentUid();
-    return fetchJSON(`/api/projects`, {}, uid);
   },
 
-  getProjectMeta: async (projectId, username = "guest") => {
-    const uid = await getCurrentUid();
-    return fetchJSON(`/api/projects/${projectId}/meta/${username}`, {}, uid);
+  getProjects: async function () {
+    const uid = await this.getCurrentUid();
+    return this.fetch(`/api/projects`, {}, uid);
   },
 
-  updateProjectMeta: async (projectId, body) => {
-    const uid = await getCurrentUid();
-    return fetchJSON(`/api/projects/${projectId}/meta`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }, uid);
+  getProjectMeta: async function (projectId, username = "guest") {
+    const uid = await this.getCurrentUid();
+    return this.fetch(`/api/projects/${projectId}/meta/${username}`, {}, uid);
   },
 
-  postView: async (projectId, username) => {
-    const uid = await getCurrentUid();
-    return fetchJSON(`/api/${projectId}/views/${username}`, { method: "POST" }, uid);
+  updateProjectMeta: async function (projectId, body) {
+    const uid = await this.getCurrentUid();
+    return this.fetch(
+      `/api/projects/${projectId}/meta`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      },
+      uid
+    );
   },
 
-  postLove: async (projectId, username) => {
-    const uid = await getCurrentUid();
-    return fetchJSON(`/api/projects/${projectId}/love/${username}`, { method: "POST" }, uid);
+  postView: async function (projectId, username) {
+    const uid = await this.getCurrentUid();
+    return this.fetch(`/api/${projectId}/views/${username}`, { method: "POST" }, uid);
   },
 
-  postFavourite: async (projectId, username) => {
-    const uid = await getCurrentUid();
-    return fetchJSON(`/api/projects/${projectId}/favourite/${username}`, { method: "POST" }, uid);
+  postLove: async function (projectId, username) {
+    const uid = await this.getCurrentUid();
+    return this.fetch(`/api/projects/${projectId}/love/${username}`, { method: "POST" }, uid);
   },
 
-  postComment: async (projectId, text, username) => {
-    const uid = await getCurrentUid();
-    return fetchJSON(`/${projectId}/comments`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, user: { username } }),
-    }, uid);
+  postFavourite: async function (projectId, username) {
+    const uid = await this.getCurrentUid();
+    return this.fetch(`/api/projects/${projectId}/favourite/${username}`, { method: "POST" }, uid);
   },
 
-  deleteComment: async (projectId, commentId) => {
-    const uid = await getCurrentUid();
-    return fetchJSON(`/${projectId}/comments/${commentId}`, {
-      method: "DELETE",
-    }, uid);
-  },
-  
-  postReply: async (projectId, commentId, text, username) => {
-    const uid = await getCurrentUid();
-    return fetchJSON(`/${projectId}/comments/${commentId}/reply`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, user: { username } }),
-    }, uid);
+  postComment: async function (projectId, text, username) {
+    const uid = await this.getCurrentUid();
+    return this.fetch(
+      `/${projectId}/comments`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, user: { username } }),
+      },
+      uid
+    );
   },
 
-  fetchComments: async (projectId) => {
-    const uid = await getCurrentUid();
-    return fetchJSON(`/${projectId}/comments`, {}, uid);
+  deleteComment: async function (projectId, commentId) {
+    const uid = await this.getCurrentUid();
+    return this.fetch(
+      `/${projectId}/comments/${commentId}`,
+      { method: "DELETE" },
+      uid
+    );
   },
 
-  uploadThumbnail: async (projectId, file) => {
-    const uid = await getCurrentUid();
+  postReply: async function (projectId, commentId, text, username) {
+    const uid = await this.getCurrentUid();
+    return this.fetch(
+      `/${projectId}/comments/${commentId}/reply`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, user: { username } }),
+      },
+      uid
+    );
+  },
+
+  fetchComments: async function (projectId) {
+    const uid = await this.getCurrentUid();
+    return this.fetch(`/${projectId}/comments`, {}, uid);
+  },
+
+  uploadThumbnail: async function (projectId, file) {
+    const uid = await this.getCurrentUid();
     const headers = { "Content-Type": file.type };
     if (uid) headers["Authorization"] = `Bearer ${uid}`;
+
     const res = await fetch(`${BASE_URL}/api/upload/${projectId}`, {
       method: "POST",
       headers,
       body: file,
     });
+
     return res.json();
   },
 
-  shareProject: async (projectId) => {
-    const uid = await getCurrentUid();
-    return fetchJSON(`/api/share/${projectId}`, { method: "PUT" }, uid);
+  shareProject: async function (projectId) {
+    const uid = await this.getCurrentUid();
+    return this.fetch(`/api/share/${projectId}`, { method: "PUT" }, uid);
   },
 
-  unshareProject: async (projectId) => {
-    const uid = await getCurrentUid();
-    return fetchJSON(`/api/unshare/${projectId}`, { method: "PUT" }, uid);
+  unshareProject: async function (projectId) {
+    const uid = await this.getCurrentUid();
+    return this.fetch(`/api/unshare/${projectId}`, { method: "PUT" }, uid);
   },
 };
+
+// Attach globally
+window.API = API;
+
+// And export for module usage
+export default API;
+export { API };
