@@ -38,8 +38,9 @@ const CommentItem = ({ comment, depth = 0, username, projectId, onCommentDeleted
           alt={displayUsername}
           className="w-6 h-6 rounded-full object-cover"
         />
-
-        <span className="comment-user font-semibold">{displayUsername}</span>
+        <a href="/users/{displayUsername}">
+          <span className="comment-user font-semibold">{displayUsername}</span>
+        </a>
         <span className="comment-date text-gray-500 text-sm">
           {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""}
         </span>
