@@ -81,7 +81,7 @@ const SnapLabsDashboard = () => {
         });
         console.log("User document created in Firestore.");
       }
-      if (!adminSnap.exists()) {
+      if (adminSnap.exists()) {
         await updateDoc(adminRef, {
           followings: arrayUnion(username)
         });
