@@ -63,7 +63,7 @@ const UserProfilePage = () => {
     fetchUser();
   }, [username]);
 
-  const isOwner = currentUser && profileUser && currentUser.uid === profileUser.uid;
+  const isOwner = currentUser && profileUser && currentUser.uid === profileUser.uid || currentUser.customClaims.admin == true || currentUser.customClaims.moderator == true;
   const isFollowing =
     currentUser && profileUser && profileUser.followers?.includes(currentUser.username || currentUser.displayName);
 
