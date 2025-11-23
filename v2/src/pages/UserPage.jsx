@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { auth, db } from "../firebaseConfig";
-import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+  doc
+} from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import Spinner from "../components/spinner/workspace";
 
@@ -10,6 +19,7 @@ const API_BASE = "https://sl-api-v1.onrender.com";
 const UserProfilePage = () => {
   const { username } = useParams();
   const [profileUser, setProfileUser] = useState(null);
+  const [profileDocId, setProfileDocId] = useState(null); // Firestore doc ID
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
@@ -22,28 +32,30 @@ const UserProfilePage = () => {
 
   // Listen for auth state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
+    const unsubscribe = onAuthStateChanged(auth, (user) => setCurrentUser(user));
     return () => unsubscribe();
   }, []);
 
-  // Fetch profile user data
+  // Fetch profile user by username
   useEffect(() => {
     const fetchUser = async () => {
       setLoading(true);
       try {
-        const userRef = doc(db, "users", username); // adjust if doc ID is UID
-        const docSnap = await getDoc(userRef);
-        if (!docSnap.exists()) {
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("username", "==", username));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
           setProfileUser(null);
+          setProfileDocId(null);
         } else {
-          const data = docSnap.data();
-          setProfileUser(data);
-          setNewDescription(data.description || "");
+          const docSnap = querySnapshot.docs[0];
+          setProfileUser(docSnap.data());
+          setProfileDocId(docSnap.id);
+          setNewDescription(docSnap.data().description || "");
         }
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch user:", err);
       } finally {
         setLoading(false);
       }
@@ -52,29 +64,38 @@ const UserProfilePage = () => {
   }, [username]);
 
   const isOwner = currentUser && profileUser && currentUser.uid === profileUser.uid;
-  const isFollowing = currentUser && profileUser && profileUser.followers?.includes(currentUser.displayName);
+  const isFollowing =
+    currentUser && profileUser && profileUser.followers?.includes(currentUser.username || currentUser.displayName);
 
-  // Follow/Unfollow toggle
+  // Follow/unfollow toggle
   const handleFollowToggle = async () => {
-    if (!currentUser || !profileUser) return;
+    if (!currentUser || !profileUser || !profileDocId) return;
 
-    const profileRef = doc(db, "users", profileUser.uid);
-    const currentRef = doc(db, "users", currentUser.uid);
+    // Get current user's Firestore doc
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("uid", "==", currentUser.uid));
+    const querySnap = await getDocs(q);
+    if (querySnap.empty) return;
+    const currentDoc = querySnap.docs[0];
+    const currentDocId = currentDoc.id;
 
     try {
+      const profileRef = doc(db, "users", profileDocId);
+      const currentRef = doc(db, "users", currentDocId);
+
       if (isFollowing) {
-        await updateDoc(profileRef, { followers: arrayRemove(currentUser.displayName) });
+        await updateDoc(profileRef, { followers: arrayRemove(currentUser.username || currentUser.displayName) });
         await updateDoc(currentRef, { followings: arrayRemove(profileUser.username) });
         setProfileUser((prev) => ({
           ...prev,
-          followers: prev.followers.filter((f) => f !== currentUser.displayName)
+          followers: prev.followers.filter((f) => f !== (currentUser.username || currentUser.displayName))
         }));
       } else {
-        await updateDoc(profileRef, { followers: arrayUnion(currentUser.displayName) });
+        await updateDoc(profileRef, { followers: arrayUnion(currentUser.username || currentUser.displayName) });
         await updateDoc(currentRef, { followings: arrayUnion(profileUser.username) });
         setProfileUser((prev) => ({
           ...prev,
-          followers: [...(prev.followers || []), currentUser.displayName]
+          followers: [...(prev.followers || []), currentUser.username || currentUser.displayName]
         }));
       }
     } catch (err) {
@@ -82,11 +103,11 @@ const UserProfilePage = () => {
     }
   };
 
-  // Update user description
+  // Update description
   const handleSaveDescription = async () => {
-    if (!profileUser) return;
+    if (!profileDocId) return;
     try {
-      const userRef = doc(db, "users", profileUser.uid);
+      const userRef = doc(db, "users", profileDocId);
       await updateDoc(userRef, { description: newDescription });
       setProfileUser((prev) => ({ ...prev, description: newDescription }));
       setEditDescription(false);
@@ -95,7 +116,7 @@ const UserProfilePage = () => {
     }
   };
 
-  // Change profile picture
+  // Profile picture upload
   const handleProfileImageChange = async (event) => {
     if (!profileUser || !event.target.files[0]) return;
     const file = event.target.files[0];
@@ -109,11 +130,9 @@ const UserProfilePage = () => {
         method: "POST",
         body: formData,
       });
-
       if (!res.ok) throw new Error("Failed to upload profile picture");
       alert("Profile picture updated successfully!");
-      // Refresh the profile by appending a timestamp to bypass cache
-      setProfileUser((prev) => ({ ...prev }));
+      setProfileUser((prev) => ({ ...prev })); // refresh
     } catch (err) {
       console.error(err);
       alert("Error uploading profile picture: " + err.message);
@@ -122,14 +141,15 @@ const UserProfilePage = () => {
     }
   };
 
-  // Fetch users for modals
+  // Fetch multiple users by username
   const fetchUsersData = async (usernames, setter) => {
     try {
       const usersData = await Promise.all(
         usernames.map(async (uname) => {
-          const docRef = doc(db, "users", uname);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) return docSnap.data();
+          const usersRef = collection(db, "users");
+          const q = query(usersRef, where("username", "==", uname));
+          const snap = await getDocs(q);
+          if (!snap.empty) return snap.docs[0].data();
           return { username: uname };
         })
       );
@@ -150,13 +170,12 @@ const UserProfilePage = () => {
   };
 
   if (loading) return <Spinner text="Loading profile..." />;
-
   if (!profileUser) return <p className="text-center mt-10 text-red-600">User not found</p>;
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow">
-        {/* Profile picture */}
+        {/* Profile Picture */}
         <div className="flex items-center mb-4 space-x-4">
           <div className="relative">
             <img
@@ -223,7 +242,7 @@ const UserProfilePage = () => {
           )}
         </div>
 
-        {/* Followers / Following stats */}
+        {/* Followers / Following */}
         <div className="mt-4 flex space-x-6">
           <div className="cursor-pointer" onClick={openFollowersModal}>
             <span className="font-semibold">{profileUser.followers?.length || 0}</span> Followers
