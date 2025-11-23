@@ -8,7 +8,7 @@ import {
   onAuthStateChanged
 } from "firebase/auth";
 import { auth, db } from "../firebaseConfig"; // db imported from config
-import { doc, setDoc, getDoc, arrayUnion } from "firebase/firestore";
+import { doc, setDoc, getDoc, arrayUnion, where, getDocs, collection } from "firebase/firestore";
 import Spinner from "../components/spinner/workspace";
 
 const API_BASE = "https://sl-api-v1.onrender.com";
@@ -99,6 +99,15 @@ const SnapLabsDashboard = () => {
       return;
     }
     try {
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("username", "==", username));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        setError("Username already exists. Please choose another one.");
+        return;
+      }
+      
       const res = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(res.user, { displayName: username });
       setUser(res.user);
