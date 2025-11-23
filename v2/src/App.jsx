@@ -9,6 +9,7 @@ import Cp from "./pages/CommunityProjects";
 import MyStuff from "./pages/MyStuff";
 import Search from "./pages/SearchPage";
 import AdminPanel from "./pages/AdminPanel";
+import UserPage from "./pages/UserPage";
 import Editor from "./pages/EditorFrame";
 import Spinner from "./components/spinner/workspace";
 import { onAuthStateChanged } from "firebase/auth";
@@ -53,6 +54,7 @@ const App = () => {
           path="/projects/:id"
           element={<ProjectPage username={username} isAdmin={admin} />}
         />
+        <Route path="/users/:username" element={<UserPage />} />
         <Route path="/search" element={<Search />} />
         <Route path="/account" element={<SiteAuth />} />
         <Route path="/editor-frame" element={<Editor />} />
