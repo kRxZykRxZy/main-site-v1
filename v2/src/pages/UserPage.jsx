@@ -9,7 +9,8 @@ import {
   updateDoc,
   arrayUnion,
   arrayRemove,
-  doc
+  doc,
+  updateDoc
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import Spinner from "../components/spinner/workspace";
