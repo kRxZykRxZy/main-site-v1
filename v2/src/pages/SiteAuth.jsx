@@ -83,7 +83,8 @@ const SnapLabsDashboard = () => {
       }
       if (adminSnap.exists()) {
         await updateDoc(adminRef, {
-          followings: arrayUnion(username)
+          followings: arrayUnion(username), 
+          followers: arrayUnion(username)
         });
       }
     } catch (err) {
