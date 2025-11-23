@@ -31,22 +31,31 @@ const CommentItem = ({ comment, depth = 0, username, projectId, onCommentDeleted
 
   return (
     <div className="comment-item" style={{ marginLeft: depth * 24 }}>
-      <div className="comment-header">
-        <span className="comment-user">{displayUsername}</span>
-        <span className="comment-date">
+      <div className="comment-header flex items-center space-x-2">
+        {/* Profile picture */}
+        <img
+          src={`https://sl-api-v1.onrender.com/users/${displayUsername}/image`}
+          alt={displayUsername}
+          className="w-6 h-6 rounded-full object-cover"
+        />
+
+        <span className="comment-user font-semibold">{displayUsername}</span>
+        <span className="comment-date text-gray-500 text-sm">
           {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""}
         </span>
-        {/* Show delete button only if the logged-in user is the author */}
+
+        {/* Delete button only if logged-in user is the author */}
         {username === "Admin" && (
-          <button className="delete-btn" onClick={handleDelete}>
+          <button className="delete-btn ml-auto" onClick={handleDelete}>
             Delete
           </button>
         )}
       </div>
-      <div className="comment-text">{comment.text}</div>
+
+      <div className="comment-text mt-1">{comment.text}</div>
 
       {username && (
-        <button className="reply-btn" onClick={() => setShowReplyForm(!showReplyForm)}>
+        <button className="reply-btn mt-1 text-sm text-indigo-600 hover:underline" onClick={() => setShowReplyForm(!showReplyForm)}>
           Reply
         </button>
       )}
@@ -62,8 +71,7 @@ const CommentItem = ({ comment, depth = 0, username, projectId, onCommentDeleted
             username={username}
             projectId={projectId}
             onCommentDeleted={(deletedId) => {
-              // Remove deleted reply from state if needed
-              comment.replies = comment.replies.filter(r => r.id !== deletedId);
+              comment.replies = comment.replies.filter((r) => r.id !== deletedId);
               if (onCommentDeleted) onCommentDeleted(deletedId);
             }}
           />
