@@ -43,7 +43,7 @@ const SnapLabsDashboard = () => {
     return () => unsubscribe();
   }, []);
 
-  // Fetch user data from your API
+  // Fetch user data from API
   const fetchUserData = async (username, uid) => {
     if (!username || !uid) return;
     setLoading(true);
@@ -101,7 +101,7 @@ const SnapLabsDashboard = () => {
       // Create Firestore document
       await createFirestoreUser(username, res.user.uid);
 
-      // Optional: send email to your server
+      // Optional: send email to API
       await sendEmailToServer(username, email, res.user.uid);
 
       fetchUserData(username, res.user.uid);
@@ -141,7 +141,7 @@ const SnapLabsDashboard = () => {
     setUserData(null);
   };
 
-  // Optional: send email to your API
+  // Optional: send email to API
   const sendEmailToServer = async (username, email, uid) => {
     try {
       await fetch(`${API_BASE}/users/${username}/email/set`, {
@@ -157,7 +157,7 @@ const SnapLabsDashboard = () => {
     }
   };
 
-  // Email change handler
+  // Email change
   const handleEmailChange = async () => {
     if (!newEmail || !user || !uid) return;
     try {
@@ -195,9 +195,51 @@ const SnapLabsDashboard = () => {
         </div>
       ) : (
         <div className="max-w-3xl mx-auto">
+          {/* User Info & Stats */}
           <div className="bg-white p-6 rounded-lg shadow mb-6">
             <h3 className="text-2xl font-semibold mb-2">Welcome, {user.displayName || "User"}!</h3>
             <p>Email: {user.email}</p>
+
+            {userData && (
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-4 gap-4 text-center">
+                <div className="bg-indigo-50 p-3 rounded">
+                  <p className="font-semibold text-indigo-700">{userData.stats?.totalProjects || 0}</p>
+                  <p className="text-sm text-gray-600">Projects</p>
+                </div>
+                <div className="bg-indigo-50 p-3 rounded">
+                  <p className="font-semibold text-indigo-700">{userData.stats?.totalViews || 0}</p>
+                  <p className="text-sm text-gray-600">Views</p>
+                </div>
+                <div className="bg-indigo-50 p-3 rounded">
+                  <p className="font-semibold text-indigo-700">{userData.stats?.totalLikes || 0}</p>
+                  <p className="text-sm text-gray-600">Likes</p>
+                </div>
+                <div className="bg-indigo-50 p-3 rounded">
+                  <p className="font-semibold text-indigo-700">{userData.stats?.totalFavorites || 0}</p>
+                  <p className="text-sm text-gray-600">Favorites</p>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-4 flex space-x-2">
+              <button onClick={() => window.location.href = `/users/${user.displayName}`} className="bg-yellow-400 py-1 px-3 rounded hover:bg-yellow-500">My Profile</button>
+              <button onClick={() => setShowEmailModal(true)} className="bg-yellow-400 py-1 px-3 rounded hover:bg-yellow-500">Change Email</button>
+              <button onClick={handleLogout} className="bg-red-600 py-1 px-3 rounded text-white hover:bg-red-700">Logout</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Email Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-80">
+            <h3 className="text-lg font-semibold mb-2">Change Email</h3>
+            <input type="email" placeholder="New Email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="w-full mb-3 px-3 py-2 border rounded" />
+            <div className="flex justify-end space-x-2">
+              <button onClick={() => setShowEmailModal(false)} className="py-1 px-3 rounded bg-gray-300 hover:bg-gray-400">Cancel</button>
+              <button onClick={handleEmailChange} className="py-1 px-3 rounded bg-indigo-600 text-white hover:bg-indigo-700">Save</button>
+            </div>
           </div>
         </div>
       )}
