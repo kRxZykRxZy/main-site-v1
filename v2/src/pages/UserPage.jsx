@@ -277,12 +277,14 @@ const UserProfilePage = () => {
             <ul>
               {followersData.map((f, idx) => (
                 <li key={idx} className="flex items-center mb-3 space-x-3">
-                  <img
-                    src={`https://sl-api-v1.onrender.com/users/${f.username}/image`}
-                    alt={f.username}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <span>{f.username}</span>
+                  <a href={`/users/${f.username}`}>
+                    <img
+                      src={`https://sl-api-v1.onrender.com/users/${f.username}/image`}
+                      alt={f.username}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <span>{f.username}</span>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -304,12 +306,14 @@ const UserProfilePage = () => {
             <ul>
               {followingData.map((f, idx) => (
                 <li key={idx} className="flex items-center mb-3 space-x-3">
-                  <img
-                    src={`https://sl-api-v1.onrender.com/users/${f.username}/image`}
-                    alt={f.username}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <span>{f.username}</span>
+                  <a href={`/users/${f.username}`}>
+                    <img
+                      src={`https://sl-api-v1.onrender.com/users/${f.username}/image`}
+                      alt={f.username}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <span>{f.username}</span>
+                  </a>
                 </li>
               ))}
             </ul>
