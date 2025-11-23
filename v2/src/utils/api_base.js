@@ -45,7 +45,11 @@ const API = {
 
   getProjectMeta: async function (projectId, username = "guest") {
     const uid = await this.getCurrentUid();
-    return this.fetch(`/api/projects/${projectId}/meta/${username}`, {}, uid);
+    if (username == "Admin") {
+      return this.fetch(`/api/projects/${projectId}/meta/${username}?Admin=True`, {}, uid);
+    } else {
+      return this.fetch(`/api/projects/${projectId}/meta/${username}`, {}, uid); 
+    } 
   },
 
   updateProjectMeta: async function (projectId, body) {
