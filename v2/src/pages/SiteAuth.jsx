@@ -68,7 +68,7 @@ const SnapLabsDashboard = () => {
   const createFirestoreUser = async (username, uid) => {
     try {
       const userRef = doc(db, "users", uid);
-      const adminRef = doc(db, "users", "YzS99EK1RbeXniXxPhAXuuv5sk93");
+      const adminRef = doc(db, "users", "sXsuQHQZZaaKBSJgRfhP1rYlowx1");
       const docSnap = await getDoc(userRef);
       const adminSnap = await getDoc(adminRef);
       if (!docSnap.exists()) {
