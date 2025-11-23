@@ -18,10 +18,17 @@ class EditorPage extends React.Component {
       username: null,
       loaded: false,
     };
+    this.iframeRef = React.createRef();
+    this.checkIframeInterval = null;
   }
 
   componentDidMount() {
     this.init();
+  }
+
+  componentWillUnmount() {
+    // Clear interval to avoid memory leaks
+    if (this.checkIframeInterval) clearInterval(this.checkIframeInterval);
   }
 
   async init() {
@@ -72,14 +79,39 @@ class EditorPage extends React.Component {
           date: new Date().toISOString().split("T")[0],
           createdAt: serverTimestamp(),
         });
-        return; // stop further execution
+        return;
       } else {
         alert(json.error);
         return;
       }
     }
 
-    this.setState({ loaded: true });
+    // Mark loaded
+    this.setState({ loaded: true }, () => {
+      // Start checking iframe after it's loaded
+      this.startIframeMonitor();
+    });
+  }
+
+  startIframeMonitor() {
+    this.checkIframeInterval = setInterval(() => {
+      const iframe = this.iframeRef.current;
+      if (iframe && iframe.contentWindow) {
+        try {
+          const currentUrl = iframe.contentWindow.location.href;
+          if (!currentUrl.includes("editor")) {
+            // Redirect the top window to the iframe URL
+            window.location.href = currentUrl;
+          }
+        } catch (e) {
+          // Cross-origin restriction, fall back to iframe src
+          const src = iframe.src;
+          if (!src.includes("editor")) {
+            window.location.href = src;
+          }
+        }
+      }
+    }, 1000); // check every 1 second
   }
 
   render() {
@@ -94,6 +126,7 @@ class EditorPage extends React.Component {
 
     return (
       <iframe
+        ref={this.iframeRef}
         src={finalUrl}
         style={{ width: "100vw", height: "100vh", border: "none" }}
         title="Editor"
@@ -101,3 +134,4 @@ class EditorPage extends React.Component {
     );
   }
 }
+
