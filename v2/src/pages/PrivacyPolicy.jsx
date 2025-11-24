@@ -69,7 +69,7 @@ const PrivacyPolicy = () => {
         <h2 className="text-2xl font-semibold text-gray-800 mt-8 mb-4">File a claim</h2>
         <p className="text-gray-700">
           If you think that your or someone else's privacy is being violated, you can make a claim.
-          Please contact <a href="mailto:contact@snaplabs.org">Our Administrators</a> or make an issue on our Github Repo.
+          Please contact <u><a href="mailto:contact@snaplabs.org">Our Administrators</a></u> or make an issue on our Github Repo.
           You may get and achievement on your profile for helpful feedback.
         </p>
       </div>
