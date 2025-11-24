@@ -49,24 +49,54 @@ const LeaderboardPage = () => {
         <h1 className="text-4xl font-bold text-center text-indigo-600 mb-10">SnapLabs Global Leaderboard</h1>
 
         {/* Top 3 Users */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
-          {topThree.map((user, index) => (
-            <div
-              key={user.username}
-              className="bg-white rounded-xl shadow p-6 text-center transform transition-transform duration-300 hover:scale-105 cursor-pointer"
-              onClick={() => handleUserClick(user.username)}
-            >
-              <img
-                src={user.profilePic}
-                alt={user.username}
-                className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-indigo-500 object-cover"
-              />
-              <h2 className="text-xl font-semibold text-gray-800">{user.username}</h2>
-              <p className="text-sm text-gray-500">{user.handle}</p>
-              <p className="mt-2 text-indigo-600 font-bold">{user.followersCount} Followers</p>
-              <div className="mt-2 text-sm text-gray-400">#{index + 1}</div>
-            </div>
-          ))}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12">
+          {/* #2 Left */}
+          <div
+            className="bg-white rounded-xl shadow p-4 text-center transform transition-transform duration-300 hover:scale-105 cursor-pointer w-64"
+            onClick={() => handleUserClick(topThree[1]?.username)}
+          >
+            <img
+              src={topThree[1]?.profilePic}
+              alt={topThree[1]?.username}
+              className="w-16 h-16 rounded-full mx-auto mb-2 object-cover"
+            />
+            <h2 className="text-lg font-semibold text-gray-800">{topThree[1]?.username}</h2>
+            <p className="text-sm text-gray-500">{topThree[1]?.handle}</p>
+            <p className="text-indigo-600 font-bold">{topThree[1]?.followersCount} Followers</p>
+            <div className="text-sm text-gray-400 mt-1">#2</div>
+          </div>
+
+          {/* #1 Center */}
+          <div
+            className="bg-white rounded-xl shadow-lg p-6 text-center transform transition-transform duration-300 hover:scale-105 cursor-pointer w-72"
+            onClick={() => handleUserClick(topThree[0]?.username)}
+          >
+            <img
+              src={topThree[0]?.profilePic}
+              alt={topThree[0]?.username}
+              className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-indigo-500 object-cover"
+            />
+            <h2 className="text-xl font-bold text-gray-800">{topThree[0]?.username}</h2>
+            <p className="text-sm text-gray-500">{topThree[0]?.handle}</p>
+            <p className="text-indigo-600 font-bold text-lg">{topThree[0]?.followersCount} Followers</p>
+            <div className="text-sm text-gray-400 mt-1">#1</div>
+          </div>
+
+          {/* #3 Right */}
+          <div
+            className="bg-white rounded-xl shadow p-4 text-center transform transition-transform duration-300 hover:scale-105 cursor-pointer w-64"
+            onClick={() => handleUserClick(topThree[2]?.username)}
+          >
+            <img
+              src={topThree[2]?.profilePic}
+              alt={topThree[2]?.username}
+              className="w-16 h-16 rounded-full mx-auto mb-2 object-cover"
+            />
+            <h2 className="text-lg font-semibold text-gray-800">{topThree[2]?.username}</h2>
+            <p className="text-sm text-gray-500">{topThree[2]?.handle}</p>
+            <p className="text-indigo-600 font-bold">{topThree[2]?.followersCount} Followers</p>
+            <div className="text-sm text-gray-400 mt-1">#3</div>
+          </div>
         </div>
 
         {/* Full Leaderboard */}
