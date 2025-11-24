@@ -9,6 +9,7 @@ import Cp from "./pages/CommunityProjects";
 import MyStuff from "./pages/MyStuff";
 import Search from "./pages/SearchPage";
 import AdminPanel from "./pages/AdminPanel";
+import PP from "./pages/PrivacyPolicy";
 import UserPage from "./pages/UserPage";
 import Editor from "./pages/EditorFrame";
 import LB from "./pages/LeaderBoard";
@@ -63,6 +64,7 @@ const App = () => {
         <Route path="/community-projects" element={<Cp />} />
         <Route path="/AI-Assistant" element={<Ai />} />
         <Route path="/dashboard" element={<MyStuff />} />
+        <Route path="/privacy-policy" element={<PP />} />
         <Route path="/admin/dashboard" element={<AdminPanel />} />
         <Route
           path="*"
