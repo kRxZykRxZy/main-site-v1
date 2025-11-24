@@ -125,6 +125,7 @@ class MenuBar extends React.Component {
             <a href="/" className="text-gray-600 hover:text-indigo-600 font-medium">Home</a>
             <a href="/community-projects" className="text-gray-600 hover:text-indigo-600 font-medium">Featured</a>
             <a href="/AI-Assistant" className="text-gray-600 hover:text-indigo-600 font-medium">AI</a>
+            <a href="/leaderboard" className="text-gray-600 hover:text-indigo-600 font-medium">Leaderboard</a>
             {showMessages && (
               <a href="/messages" className="text-gray-600 hover:text-indigo-600 font-medium">Messages</a>
             )}
@@ -207,6 +208,7 @@ class MenuBar extends React.Component {
               <a href="/" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Home</a>
               <a href="/community-projects" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Featured</a>
               <a href="/AI-Assistant" className="text-gray-600 hover:text-indigo-600 font-medium py-1">AI</a>
+              <a href="/leaderboard" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Leaderboard</a>
               {showMessages && (
                 <a href="/messages" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Messages</a>
               )}
