@@ -7,8 +7,8 @@ import {
   verifyBeforeUpdateEmail,
   onAuthStateChanged
 } from "firebase/auth";
-import { auth, db } from "../firebaseConfig"; // db imported from config
-import { doc, query, setDoc, getDoc, arrayUnion, where, getDocs, collection } from "firebase/firestore";
+import { auth, db } from "../firebaseConfig";
+import { doc, query, setDoc, getDoc, arrayUnion, where, getDocs, collection, updateDoc } from "firebase/firestore";
 import Spinner from "../components/spinner/workspace";
 
 const API_BASE = "https://sl-api-v1.onrender.com";
@@ -64,29 +64,45 @@ const SnapLabsDashboard = () => {
     }
   };
 
-  // Create Firestore user document
+  // Create Firestore user document and handle Admin followers
   const createFirestoreUser = async (username, uid) => {
     try {
+      const usersRef = collection(db, "users");
+
+      // Find Admin by username
+      const adminQuery = query(usersRef, where("username", "==", "Admin"));
+      const adminSnapshot = await getDocs(adminQuery);
+
+      if (adminSnapshot.empty) {
+        console.warn("Admin user not found in Firestore.");
+        return;
+      }
+
+      const adminDoc = adminSnapshot.docs[0];
+      const adminData = adminDoc.data();
+      const adminRef = adminDoc.ref;
+
+      // Create the new user document
       const userRef = doc(db, "users", uid);
-      const adminRef = doc(db, "users", "sXsuQHQZZaaKBSJgRfhP1rYlowx1");
-      const docSnap = await getDoc(userRef);
-      const adminSnap = await getDoc(adminRef);
-      if (!docSnap.exists()) {
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
         await setDoc(userRef, {
           username,
           uid,
-          followers: ["Admin"],
-          followings: ["Admin"],
+          followers: [adminData.username],
+          followings: [adminData.username],
           achievements: [""]
         });
         console.log("User document created in Firestore.");
       }
-      if (adminSnap.exists()) {
-        await updateDoc(adminRef, {
-          followings: arrayUnion(username), 
-          followers: arrayUnion(username)
-        });
-      }
+
+      // Update Admin's followers and followings to include new user
+      await updateDoc(adminRef, {
+        followers: arrayUnion(username),
+        followings: arrayUnion(username)
+      });
+
     } catch (err) {
       console.error("Failed to create Firestore user:", err);
     }
@@ -108,14 +124,14 @@ const SnapLabsDashboard = () => {
         setError("Username already exists. Please choose another one.");
         return;
       }
-      
+
       const res = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(res.user, { displayName: username });
       setUser(res.user);
       setUid(res.user.uid);
       window.username = username;
 
-      // Create Firestore document
+      // Create Firestore document and link with Admin
       await createFirestoreUser(username, res.user.uid);
 
       // Optional: send email to API
@@ -212,11 +228,9 @@ const SnapLabsDashboard = () => {
         </div>
       ) : (
         <div className="max-w-3xl mx-auto">
-          {/* User Info & Stats */}
           <div className="bg-white p-6 rounded-lg shadow mb-6">
             <h3 className="text-2xl font-semibold mb-2">Welcome, {user.displayName || "User"}!</h3>
             <p>Email: {user.email}</p>
-
             {userData && (
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-4 gap-4 text-center">
                 <div className="bg-indigo-50 p-3 rounded">
@@ -237,7 +251,6 @@ const SnapLabsDashboard = () => {
                 </div>
               </div>
             )}
-
             <div className="mt-4 flex space-x-2">
               <button onClick={() => window.location.href = `/users/${user.displayName}`} className="bg-yellow-400 py-1 px-3 rounded hover:bg-yellow-500">My Profile</button>
               <button onClick={() => setShowEmailModal(true)} className="bg-yellow-400 py-1 px-3 rounded hover:bg-yellow-500">Change Email</button>
@@ -247,7 +260,6 @@ const SnapLabsDashboard = () => {
         </div>
       )}
 
-      {/* Email Modal */}
       {showEmailModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-lg w-80">
