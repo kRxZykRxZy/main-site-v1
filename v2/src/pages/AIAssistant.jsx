@@ -24,7 +24,7 @@ const AiAssistant = () => {
 
     try {
       // 🚀 Firebase AI Logic call (Gemini)
-      const result = await aiLogic.run("assistant", {
+      const result = await aiLogic.run("gemini", {
         user_input: prompt,
       });
 
@@ -34,7 +34,7 @@ const AiAssistant = () => {
     } catch (error) {
       console.error("Firebase AI error:", error);
       setProjectIdeaOutput(
-        "Failed to contact the AI Assistant. Check your connection and try again."
+        "Failed to contact the AI Assistant. Check your connection and try again. Details: " + error
       );
     } finally {
       setLoading(false);
