@@ -10,8 +10,11 @@ const CommentForm = ({ projectId, username, onCommentPosted }) => {
     if (!text.trim()) return;
 
     try {
-      await API.postComment(projectId, text, username);
+      const res = await API.postComment(projectId, text, username);
       setText("");
+      if (res.error) {
+        alert(res.error);
+      }
       onCommentPosted && onCommentPosted();
     } catch (err) {
       console.error("Comment failed:", err);
