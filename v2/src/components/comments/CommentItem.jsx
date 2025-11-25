@@ -9,7 +9,10 @@ const CommentItem = ({ comment, depth = 0, username, projectId, onCommentDeleted
 
   const handleReplySubmit = async (text) => {
     try {
-      await API.postReply(projectId, comment.id, text, username);
+      const res = await API.postReply(projectId, comment.id, text, username);
+      if (res.error) {
+        alert(res.error);
+      }
       window.location.reload();
       setShowReplyForm(false);
     } catch (err) {
