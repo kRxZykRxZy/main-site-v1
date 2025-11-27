@@ -78,6 +78,7 @@ async function generateSitemap() {
   console.log(`Found ${projects.length} projects`);
 
   projects.forEach((projId) => {
+    urls.push(`/projects/${projId}`);
     urls.push(`/projects/${projId}/editor`);
   });
 
