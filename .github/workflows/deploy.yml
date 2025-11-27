@@ -25,6 +25,8 @@ jobs:
         run: |
           npm install
           npm install firebase
+          node src/gen-sitemap.js
+          
           npm run build
 
       - name: Deploy to Codeberg Pages
