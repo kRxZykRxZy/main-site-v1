@@ -45,20 +45,3 @@ jobs:
       - name: Build Site
         working-directory: v2
         run: npm run build
-
-      # 5️⃣ Deploy the build to Codeberg Pages
-      - name: Deploy Build to Codeberg Pages
-        run: |
-          cd v2/dist
-
-          git init
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-
-          git add .
-          git commit -m "Deploy from GitHub Actions"
-
-          git branch -M main
-          git remote add origin https://KRXZY:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/snaplabs/pages.git
-
-          git push --force origin main
