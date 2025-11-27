@@ -1,11 +1,10 @@
-// generateSitemap.js
 import fs from "fs";
 import path from "path";
 import { db } from "./firebaseConfig.js"; // make sure firebaseConfig exports 'db'
 import { collection, getDocs } from "firebase/firestore";
 
 const BASE_URL = "https://sl-api-v1.onrender.com/api/projects";
-const DOMAIN = "https://snaplabs.js.org"; // replace with your domain
+const DOMAIN = "https://snaplabs.js.org"; 
 
 const STATIC_ROUTES = [
   "/",
@@ -20,7 +19,7 @@ async function fetchProjectsForUser(userId) {
   let id = 1;
 
   while (consecutive404 < 2) {
-    const url = `${BASE_URL}/${id}:meta/guest?Admin=True&userId=${userId}`;
+    const url = `${BASE_URL}/${id}/meta/guest?Admin=True&userId=${userId}`;
     try {
       const res = await fetch(url);
       if (res.status === 404) {
