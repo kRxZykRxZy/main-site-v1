@@ -29,6 +29,3 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const auth = getAuth(app);
 export const aiLogic = getAI(app, { backend: new GoogleAIBackend() });
-
-// Do not export `auth` here — code should use firebase/auth and onAuthStateChanged directly
-export default app;
