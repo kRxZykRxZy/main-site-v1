@@ -26,15 +26,17 @@ jobs:
           npm install
           npm install firebase
           node src/gen-sitemap.js
-          
+          git init 
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add . 
+          git commit -m "Generate Sitemap" 
+          git push --force origin main
           npm run build
 
       - name: Deploy to Codeberg Pages
         run: |
           cd v2/dist
-          git init
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
           git add .
           git commit -m "Deploy from GitHub Actions"
           git branch -M main
