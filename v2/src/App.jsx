@@ -13,6 +13,7 @@ import PP from "./pages/PrivacyPolicy";
 import UserPage from "./pages/UserPage";
 import Editor from "./pages/EditorFrame";
 import LB from "./pages/LeaderBoard";
+import Messages from "./pages/Messages";
 import Spinner from "./components/spinner/workspace";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebaseConfig"; // import from your firebase setup
@@ -61,6 +62,7 @@ const App = () => {
         <Route path="/account" element={<SiteAuth />} />
         <Route path="/leaderboard" element={<LB />} />
         <Route path="/editor-frame" element={<Editor />} />
+        <Route path="/messages" element={<Messages />} />
         <Route path="/community-projects" element={<Cp />} />
         <Route path="/AI-Assistant" element={<Ai />} />
         <Route path="/dashboard" element={<MyStuff />} />
