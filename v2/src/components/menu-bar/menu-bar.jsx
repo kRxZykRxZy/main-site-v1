@@ -38,6 +38,10 @@ class MenuBar extends React.Component {
     this.setState((prev) => ({ mobileOpen: !prev.mobileOpen }));
   };
 
+  messagesClick = () => {
+    window.location.href = '/messages';
+  };
+
   toggleDropdown = () => {
     this.setState((prev) => ({ dropdownOpen: !prev.dropdownOpen }));
   };
@@ -150,6 +154,14 @@ class MenuBar extends React.Component {
 
           {/* ---------- RIGHT SIDE USER AREA ---------- */}
           {user ? (
+            <div className="relative">
+              <img
+                src="/static/notification-bell.svg"
+                onClick={this.messagesClick}
+                className="w-10 h-10"
+                alt="notifications" 
+              />
+            </div>
             <div className="relative">
               <img
                 src={pfpURL}
