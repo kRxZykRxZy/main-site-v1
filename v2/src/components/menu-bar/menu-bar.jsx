@@ -26,7 +26,7 @@ class MenuBar extends React.Component {
 
         // Load profile picture
         this.setState({
-          pfpURL: `https://sl-api-v1.onrender.com/users/${username}`
+          pfpURL: `https://sl-api-v1.onrender.com/users/${username}/image`
         });
       } else {
         this.setState({ user: null, pfpURL: "" });
@@ -179,14 +179,6 @@ class MenuBar extends React.Component {
               <a href="/account" className="text-gray-700 hover:text-purple-600">Sign In</a>
             </div>
           )}
-
-          {/* MOBILE MENU BUTTON */}
-          <button
-            onClick={this.toggleMobileMenu}
-            className="md:hidden text-gray-700 ml-4"
-          >
-            ☰
-          </button>
         </div>
       </header>
     );
