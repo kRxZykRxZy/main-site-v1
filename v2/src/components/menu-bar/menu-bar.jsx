@@ -90,12 +90,11 @@ class MenuBar extends React.Component {
           {/* ---------- LOGO (Scratch Style) ---------- */}
           <a href="/" className="flex items-center space-x-2">
             <svg width="90" height="35" viewBox="0 0 90 35">
-              <rect x="0" y="0" width="90" height="35" rx="8" fill="#ffb92e" />
               <text
                 x="45"
                 y="22"
                 fontSize="18"
-                fill="white"
+                fill="blue"
                 fontWeight="bold"
                 textAnchor="middle"
               >
