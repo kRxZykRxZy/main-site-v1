@@ -11,10 +11,11 @@ class MenuBar extends React.Component {
       searchTerm: "",
       searchResults: [],
       showDropdown: false,
-
       user: null,
+      username: "",
       pfpURL: "",
-      dropdownOpen: false
+      dropdownOpen: false,
+      messageCount: null,
     };
   }
 
@@ -23,23 +24,43 @@ class MenuBar extends React.Component {
       if (user) {
         const username = user.displayName;
         this.setState({ user, username });
-
-        // Load profile picture
         this.setState({
           pfpURL: `https://sl-api-v1.onrender.com/users/${username}/image`
         });
+
+        this.fetchMessageCount(user);
       } else {
-        this.setState({ user: null, pfpURL: "" });
+        this.setState({ user: null, username: "", pfpURL: "", messageCount: null });
       }
     });
   }
+
+  fetchMessageCount = async (user) => {
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("https://sl-api-v1.onrender.com/users/me/messages/count", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) return; 
+      const data = await res.json();
+      if (data && typeof data.count === "number") {
+        this.setState({ messageCount: data.count });
+      }
+    } catch (err) {
+      // silently ignore errors
+      console.error("Failed to fetch message count", err);
+    }
+  };
 
   toggleMobileMenu = () => {
     this.setState((prev) => ({ mobileOpen: !prev.mobileOpen }));
   };
 
   messagesClick = () => {
-    window.location.href = '/messages';
+    window.location.href = "/messages";
   };
 
   toggleDropdown = () => {
@@ -70,7 +91,6 @@ class MenuBar extends React.Component {
   handleSearchSubmit = (e) => {
     e.preventDefault();
     const { searchTerm } = this.state;
-
     if (searchTerm.trim()) {
       window.location.href = `/search?q=${encodeURIComponent(searchTerm)}`;
     }
@@ -78,20 +98,19 @@ class MenuBar extends React.Component {
 
   render() {
     const {
-      mobileOpen,
       searchTerm,
       searchResults,
       showDropdown,
       pfpURL,
       user,
-      dropdownOpen
+      username,
+      dropdownOpen,
+      messageCount
     } = this.state;
 
     return (
       <header className="bg-[#f5f5f5] shadow-md border-b-2 border-purple-300 relative">
         <div className="w-full px-6 py-3 flex items-center justify-between">
-
-          {/* ---------- LOGO (Scratch Style) ---------- */}
           <a href="/" className="flex items-center space-x-2">
             <svg width="90" height="35" viewBox="0 0 90 35">
               <text
@@ -107,18 +126,13 @@ class MenuBar extends React.Component {
             </svg>
           </a>
 
-          {/* ---------- NAV LINKS ---------- */}
           <nav className="hidden md:flex space-x-6 text-gray-700 font-medium">
             <a href="/projects/0/editor" className="hover:text-purple-600">Create</a>
             <a href="/community-projects" className="hover:text-purple-600">Explore</a>
             <a href="/AI-Assistant" className="hover:text-purple-600">Ideas</a>
           </nav>
 
-          {/* ---------- SEARCH BAR (Scratch Style) ---------- */}
-          <form
-            onSubmit={this.handleSearchSubmit}
-            className="relative hidden md:block w-1/3"
-          >
+          <form onSubmit={this.handleSearchSubmit} className="relative hidden md:block w-1/3">
             <input
               type="text"
               value={searchTerm}
@@ -126,7 +140,6 @@ class MenuBar extends React.Component {
               placeholder="Search"
               className="w-full rounded-md bg-white border border-gray-300 px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
-
             <svg
               className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
               fill="none"
@@ -152,37 +165,43 @@ class MenuBar extends React.Component {
             )}
           </form>
 
-          {/* ---------- RIGHT SIDE USER AREA ---------- */}
           {user ? (
-            <div className="relative">
-              <img
-                src="/static/notification-bell.svg"
-                onClick={this.messagesClick}
-                className="w-10 h-10"
-                alt="notifications" 
-              />
-            </div>
-            <div className="relative">
-              <img
-                src={pfpURL}
-                onClick={this.toggleDropdown}
-                className="w-10 h-10 rounded-full cursor-pointer border-2 border-purple-500"
-                alt="pfp"
-              />
+            <div className="flex items-center space-x-4 relative">
+              <div className="relative">
+                <img
+                  src="/static/notification-bell.svg"
+                  onClick={this.messagesClick}
+                  className="w-10 h-10 cursor-pointer"
+                  alt="notifications"
+                />
+                {messageCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                    {messageCount}
+                  </span>
+                )}
+              </div>
 
-              {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg border z-30">
-                  <a href={`/users/${username}`} className="block px-4 py-2 hover:bg-gray-100">Profile</a>
-                  <a href="/dashboard" className="block px-4 py-2 hover:bg-gray-100">My Stuff</a>
-                  <a href="/account" className="block px-4 py-2 hover:bg-gray-100">Settings</a>
-                  <button
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                    onClick={() => auth.signOut()}
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              )}
+              <div className="relative">
+                <img
+                  src={pfpURL}
+                  onClick={this.toggleDropdown}
+                  className="w-10 h-10 rounded-full cursor-pointer border-2 border-purple-500"
+                  alt="pfp"
+                />
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg border z-30">
+                    <a href={`/users/${username}`} className="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                    <a href="/dashboard" className="block px-4 py-2 hover:bg-gray-100">My Stuff</a>
+                    <a href="/account" className="block px-4 py-2 hover:bg-gray-100">Settings</a>
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      onClick={() => auth.signOut()}
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <div className="flex space-x-4">
