@@ -1,5 +1,7 @@
 import React from "react";
 import { API } from "../../utils/api_base";
+import { auth } from "../../firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
 
 class MenuBar extends React.Component {
   constructor(props) {
@@ -9,20 +11,42 @@ class MenuBar extends React.Component {
       searchTerm: "",
       searchResults: [],
       showDropdown: false,
+
+      user: null,
+      pfpURL: "",
+      dropdownOpen: false
     };
   }
 
+  componentDidMount() {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const username = user.displayName;
+        this.setState({ user, username });
+
+        // Load profile picture
+        this.setState({
+          pfpURL: `https://sl-api-v1.onrender.com/users/${username}`
+        });
+      } else {
+        this.setState({ user: null, pfpURL: "" });
+      }
+    });
+  }
+
   toggleMobileMenu = () => {
-    this.setState((prevState) => ({
-      mobileOpen: !prevState.mobileOpen,
-    }));
+    this.setState((prev) => ({ mobileOpen: !prev.mobileOpen }));
+  };
+
+  toggleDropdown = () => {
+    this.setState((prev) => ({ dropdownOpen: !prev.dropdownOpen }));
   };
 
   handleSearchChange = async (e) => {
     const value = e.target.value;
     this.setState({ searchTerm: value });
 
-    if (value.trim().length === 0) {
+    if (!value.trim()) {
       this.setState({ searchResults: [], showDropdown: false });
       return;
     }
@@ -42,183 +66,128 @@ class MenuBar extends React.Component {
   handleSearchSubmit = (e) => {
     e.preventDefault();
     const { searchTerm } = this.state;
+
     if (searchTerm.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchTerm.trim())}`;
+      window.location.href = `/search?q=${encodeURIComponent(searchTerm)}`;
     }
   };
 
   render() {
-    const { username } = this.props;
-    const { mobileOpen, searchTerm, searchResults, showDropdown } = this.state;
-    const showMessages = Boolean(username);
-    const showAdmin = username == "Admin";
-
-    if (typeof window !== "undefined" && window.location.pathname.includes("editor")) {
-      return null;
-    }
+    const {
+      mobileOpen,
+      searchTerm,
+      searchResults,
+      showDropdown,
+      pfpURL,
+      user,
+      dropdownOpen
+    } = this.state;
 
     return (
-      <header className="bg-white shadow-sm py-4 relative z-50">
-        <div className="container mx-auto px-4 flex items-center justify-between">
-          {/* Left Section - SVG Logo */}
-          <div className="flex items-center justify-start flex-shrink-0 space-x-2">
-            <a href="/" className="flex items-center space-x-2 text-2xl font-bold text-indigo-600">
-              {/* Inline SVG Logo */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-8 h-8"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 0L24 24H0L12 0z" /> {/* Example placeholder triangle SVG */}
-              </svg>
-              <span>SnapLabs</span>
-            </a>
-          </div>
+      <header className="bg-[#f5f5f5] shadow-md border-b-2 border-purple-300 relative">
+        <div className="w-full px-6 py-3 flex items-center justify-between">
 
-          {/* Center Section - Search bar (Desktop only) */}
+          {/* ---------- LOGO (Scratch Style) ---------- */}
+          <a href="/" className="flex items-center space-x-2">
+            <svg width="90" height="35" viewBox="0 0 90 35">
+              <rect x="0" y="0" width="90" height="35" rx="8" fill="#ffb92e" />
+              <text
+                x="45"
+                y="22"
+                fontSize="18"
+                fill="white"
+                fontWeight="bold"
+                textAnchor="middle"
+              >
+                SnapLabs
+              </text>
+            </svg>
+          </a>
+
+          {/* ---------- NAV LINKS ---------- */}
+          <nav className="hidden md:flex space-x-6 text-gray-700 font-medium">
+            <a href="/projects/0/editor" className="hover:text-purple-600">Create</a>
+            <a href="/community-projects" className="hover:text-purple-600">Explore</a>
+            <a href="/AI-Assistant" className="hover:text-purple-600">Ideas</a>
+          </nav>
+
+          {/* ---------- SEARCH BAR (Scratch Style) ---------- */}
           <form
             onSubmit={this.handleSearchSubmit}
-            className="relative w-1/2 hidden md:block"
+            className="relative hidden md:block w-1/3"
           >
             <input
               type="text"
               value={searchTerm}
               onChange={this.handleSearchChange}
-              placeholder="Search projects..."
-              className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Search"
+              className="w-full rounded-md bg-white border border-gray-300 px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
-            <button
-              type="submit"
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700"
-            >
-              Search
-            </button>
 
-            {/* Dropdown search results */}
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="11" cy="11" r="7" strokeWidth="2" />
+              <line x1="16.5" y1="16.5" x2="21" y2="21" strokeWidth="2" />
+            </svg>
+
             {showDropdown && searchResults.length > 0 && (
-              <ul className="absolute left-0 mt-2 w-full bg-white shadow-lg rounded-lg border border-gray-200 max-h-60 overflow-y-auto">
+              <ul className="absolute mt-2 w-full bg-white border rounded-lg shadow-lg z-20">
                 {searchResults.map((proj) => (
                   <li
                     key={proj.id}
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() =>
-                      (window.location.href = `/projects/${proj.id}`)
-                    }
+                    onClick={() => (window.location.href = `/projects/${proj.id}`)}
                   >
-                    <div className="flex items-center space-x-2">
-                      <img
-                        src="/static/No%20Cover%20Available"
-                        alt={proj.name}
-                        className="w-8 h-8 rounded object-cover"
-                      />
-                      <span className="text-gray-700">{proj.name}</span>
-                    </div>
+                    {proj.name}
                   </li>
                 ))}
               </ul>
             )}
           </form>
 
-          {/* Right Section - Navigation */}
-          <nav className="hidden md:flex space-x-6">
-            <a href="/" className="text-gray-600 hover:text-indigo-600 font-medium">Home</a>
-            <a href="/community-projects" className="text-gray-600 hover:text-indigo-600 font-medium">Featured</a>
-            <a href="/AI-Assistant" className="text-gray-600 hover:text-indigo-600 font-medium">AI</a>
-            <a href="/leaderboard" className="text-gray-600 hover:text-indigo-600 font-medium">Leaderboard</a>
-            {showMessages && (
-              <a href="/messages" className="text-gray-600 hover:text-indigo-600 font-medium">Messages</a>
-            )}
-            {showAdmin && (
-              <a href="/admin/dashboard" className="text-gray-600 hover:text-indigo-600 font-medium">Admin</a>
-            )}
-            <a href="/account" className="text-gray-600 hover:text-indigo-600 font-medium">Dashboard</a>
-          </nav>
+          {/* ---------- RIGHT SIDE USER AREA ---------- */}
+          {user ? (
+            <div className="relative">
+              <img
+                src={pfpURL}
+                onClick={this.toggleDropdown}
+                className="w-10 h-10 rounded-full cursor-pointer border-2 border-purple-500"
+                alt="pfp"
+              />
 
-          {/* Mobile Menu Toggle */}
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg border z-30">
+                  <a href={`/users/${username}`} className="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                  <a href="/dashboard" className="block px-4 py-2 hover:bg-gray-100">My Stuff</a>
+                  <a href="/account" className="block px-4 py-2 hover:bg-gray-100">Settings</a>
+                  <button
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                    onClick={() => auth.signOut()}
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex space-x-4">
+              <a href="/account" className="text-purple-600 font-semibold">Join</a>
+              <a href="/account" className="text-gray-700 hover:text-purple-600">Sign In</a>
+            </div>
+          )}
+
+          {/* MOBILE MENU BUTTON */}
           <button
             onClick={this.toggleMobileMenu}
-            className="md:hidden text-gray-600 hover:text-indigo-600 focus:outline-none"
+            className="md:hidden text-gray-700 ml-4"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
+            ☰
           </button>
         </div>
-
-        {/* Mobile Navigation */}
-        {mobileOpen && (
-          <div className="md:hidden bg-white py-2 shadow-md">
-            {/* Mobile search */}
-            <form
-              onSubmit={this.handleSearchSubmit}
-              className="relative px-4 mb-3"
-            >
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={this.handleSearchChange}
-                placeholder="Search projects..."
-                className="w-full border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              <button
-                type="submit"
-                className="absolute right-6 top-1/2 -translate-y-1/2 bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700"
-              >
-                Search
-              </button>
-
-              {/* Dropdown results in mobile */}
-              {showDropdown && searchResults.length > 0 && (
-                <ul className="absolute left-4 right-4 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 max-h-60 overflow-y-auto">
-                  {searchResults.map((proj) => (
-                    <li
-                      key={proj.id}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() =>
-                        (window.location.href = `/projects/${proj.id}`)
-                      }
-                    >
-                      <div className="flex items-center space-x-2">
-                        <img
-                          src="/static/No%20Cover%20Available"
-                          alt={proj.name}
-                          className="w-8 h-8 rounded object-cover"
-                        />
-                        <span className="text-gray-700">{proj.name}</span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </form>
-
-            {/* Mobile links */}
-            <nav className="flex flex-col items-center space-y-2">
-              <a href="/" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Home</a>
-              <a href="/community-projects" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Featured</a>
-              <a href="/AI-Assistant" className="text-gray-600 hover:text-indigo-600 font-medium py-1">AI</a>
-              <a href="/leaderboard" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Leaderboard</a>
-              {showMessages && (
-                <a href="/messages" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Messages</a>
-              )}
-              {showAdmin && (
-                <a href="/admin/dashboard" className="text-gray-600 hover:text-indigo-600 font-medium">Admin</a>
-              )}
-              <a href="/account" className="text-gray-600 hover:text-indigo-600 font-medium py-1">Dashboard</a>
-            </nav>
-          </div>
-        )}
       </header>
     );
   }
