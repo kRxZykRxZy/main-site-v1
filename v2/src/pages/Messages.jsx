@@ -43,6 +43,8 @@ const MessagesPage = () => {
                   Authorization: `Bearer ${token}`,
                 },
               });
+              // Update local messages as read
+              setMessages((prev) => prev.map((m) => ({ ...m, read: true })));
               setMessageCount(0);
             } catch (err) {
               console.error("Failed to reset message count", err);
@@ -62,9 +64,32 @@ const MessagesPage = () => {
     };
   }, []);
 
-  const handleMarkAsRead = (msgIndex) => {
-    setMessages((prev) => prev.filter((_, i) => i !== msgIndex));
-    setMessageCount((prev) => Math.max(prev - 1, 0));
+  const handleMarkAsRead = async (msgIndex) => {
+    if (!user) return;
+    const currentMessage = messages[msgIndex];
+
+    try {
+      const token = await user.getIdToken();
+      await fetch("https://sl-api-v1.onrender.com/users/me/messages/mark", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ index: msgIndex }),
+      });
+
+      // Update local state
+      setMessages((prev) => {
+        const newMsgs = [...prev];
+        newMsgs[msgIndex].read = true;
+        return newMsgs;
+      });
+
+      setMessageCount((prev) => Math.max(prev - 1, 0));
+    } catch (err) {
+      console.error("Failed to mark message as read", err);
+    }
   };
 
   if (!user) {
@@ -91,7 +116,9 @@ const MessagesPage = () => {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className="bg-white rounded-lg shadow p-4 flex flex-col"
+                className={`bg-white rounded-lg shadow p-4 flex flex-col ${
+                  msg.read ? "opacity-70" : ""
+                }`}
               >
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-gray-800">{msg.sender}</span>
@@ -100,12 +127,14 @@ const MessagesPage = () => {
                   </span>
                 </div>
                 <p className="text-gray-700 mb-2">{msg.content}</p>
-                <button
-                  onClick={() => handleMarkAsRead(index)}
-                  className="self-end bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 transition"
-                >
-                  Mark as Read
-                </button>
+                {!msg.read && (
+                  <button
+                    onClick={() => handleMarkAsRead(index)}
+                    className="self-end bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 transition"
+                  >
+                    Mark as Read
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -116,4 +145,3 @@ const MessagesPage = () => {
 };
 
 export default MessagesPage;
- 
