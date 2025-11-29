@@ -12,7 +12,7 @@ const UserProfile = memo(() => {
       if (user) {
         const username = user.displayName || null;
         if (username) {
-          setIframeSrc(`https://sl-api-v1.onrender.com/users/${username}`);
+          setIframeSrc(`https://sl-api-v1.onrender.com/users/${username}/projects`);
         } else {
           window.location.href = "/404";
         }
