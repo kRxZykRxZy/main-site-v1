@@ -126,7 +126,10 @@ const MessagesPage = () => {
                     {new Date(msg.timestamp).toLocaleString()}
                   </span>
                 </div>
-                <p className="text-gray-700 mb-2">{msg.content}</p>
+                <p 
+                  className="text-gray-700 mb-2"
+                  dangerouslySetInnerHTML={{ __html: msg.content }}
+                ></p>
                 {!msg.read && (
                   <button
                     onClick={() => handleMarkAsRead(index)}
