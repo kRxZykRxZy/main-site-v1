@@ -179,7 +179,7 @@ class MenuBar extends React.Component {
                     className="w-8 h-8 cursor-pointer"
                     alt="notifications"
                   />
-                )} 
+                ) : ()} 
                 <img
                   src="/static/notification-bell.svg"
                   onClick={this.messagesClick}
