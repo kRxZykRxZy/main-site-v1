@@ -63,6 +63,10 @@ class MenuBar extends React.Component {
     window.location.href = "/messages";
   };
 
+  adminClick = () => {
+    window.location.href = "/admin/dashboard";
+  };
+
   toggleDropdown = () => {
     this.setState((prev) => ({ dropdownOpen: !prev.dropdownOpen }));
   };
@@ -168,6 +172,14 @@ class MenuBar extends React.Component {
           {user ? (
             <div className="flex items-center space-x-4 relative">
               <div className="relative">
+                {user?.customClaims?.admin ? (
+                  <img
+                    src="/static/admin-dash.svg"
+                    onClick={this.adminClick}
+                    className="w-8 h-8 cursor-pointer"
+                    alt="notifications"
+                  />
+                )} 
                 <img
                   src="/static/notification-bell.svg"
                   onClick={this.messagesClick}
