@@ -172,7 +172,7 @@ class MenuBar extends React.Component {
           {user ? (
             <div className="flex items-center space-x-4 relative">
               <div className="relative">
-                {user?.customClaims?.admin ? (
+                {user?.customClaims?.admin == true ? (
                   <img
                     src="/static/admin-dash.svg"
                     onClick={this.adminClick}
