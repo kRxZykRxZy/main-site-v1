@@ -5,6 +5,8 @@ on:
     branches:
       - main
   workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *" 
 
 jobs:
   build-and-deploy:
@@ -28,7 +30,6 @@ jobs:
         working-directory: v2
         run: |
           npm install
-          npm install firebase
           node src/gen-sitemap.mjs
 
           git config user.name "GitHub Actions"
