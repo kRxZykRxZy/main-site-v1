@@ -40,8 +40,3 @@ jobs:
 
           # Push sitemap commit to the current repo
           git push origin main
-
-      # 4️⃣ Build the site
-      - name: Build Site
-        working-directory: v2
-        run: npm run build
