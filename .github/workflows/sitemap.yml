@@ -1,4 +1,4 @@
-name: Build and Deploy to Codeberg Pages
+name: Build Sitemap
 
 on:
   push:
@@ -6,26 +6,26 @@ on:
       - main
   workflow_dispatch:
   schedule:
-    - cron: "*/30 * * * *" 
+    - cron: "*/30 * * * *"
+
+permissions:
+  contents: write  # Needed to push back
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the current repo
       - name: Checkout current repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Needed to push commits back
+          fetch-depth: 0
 
-      # 2️⃣ Set up Node.js
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      # 3️⃣ Install dependencies, generate sitemap, and push to current repo
       - name: Generate Sitemap and Commit
         working-directory: v2
         run: |
@@ -35,9 +35,15 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-          # Add sitemap only if it exists
-          git add public/sitemap.xml || git add sitemap.xml
-          git commit -m "Generate Sitemap" || echo "No changes to commit"
+          if [ -f public/sitemap.xml ]; then
+            git add public/sitemap.xml
+          elif [ -f sitemap.xml ]; then
+            git add sitemap.xml
+          fi
 
-          # Push sitemap commit to the current repo
-          git push origin main
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Generate Sitemap"
+            git push origin main
+          fi
