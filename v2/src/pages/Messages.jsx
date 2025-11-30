@@ -24,7 +24,7 @@ const MessagesPage = () => {
             headers: { Authorization: `Bearer ${token}` },
           });
           const data = await res.json();
-          setMessages(data.messages || []);
+          setMessages(data.messages.reverse() || []);
 
           // Fetch message count
           const countRes = await fetch("https://sl-api-v1.onrender.com/users/me/messages/count", {
