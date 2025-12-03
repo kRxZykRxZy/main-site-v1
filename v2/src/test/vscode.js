@@ -41,7 +41,8 @@ if (!fs.existsSync(exampleProjectFile)) {
 }
 
 // Start code-server on port 5733
-let codeServerProcess = spawn('code-server', [
+const codeServerPath = '/usr/bin/code-server'; // <-- this is where Render usually installs binaries 
+let codeServerProcess = spawn(codeServerPath, [
   '--port', '5733',
   '--auth', 'none',
   WORKSPACES_DIR
