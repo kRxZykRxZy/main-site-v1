@@ -13,18 +13,11 @@ app.use(express.json());
 const PROJECTS_DIR = path.join(__dirname, 'local_storage', 'projects');
 const WORKSPACES_DIR = path.join(__dirname, 'workspaces');
 
-// Install code-server using spawn instead of exec
-const installer = spawn('sh', ['-c', 'curl -fsSL https://code-server.dev/install.sh | sh'], { stdio: 'inherit' });
-
-installer.on('exit', (code) => {
-  console.log(`Installer exited with code ${code}`);
-});
-
 // Ensure directories exist
 if (!fs.existsSync(PROJECTS_DIR)) fs.mkdirSync(PROJECTS_DIR, { recursive: true });
 if (!fs.existsSync(WORKSPACES_DIR)) fs.mkdirSync(WORKSPACES_DIR, { recursive: true });
 
-// Create example project if it doesn't exist
+// Create example project
 const exampleProjectId = 'example';
 const exampleProjectFile = path.join(PROJECTS_DIR, `${exampleProjectId}.json`);
 
@@ -35,24 +28,11 @@ if (!fs.existsSync(exampleProjectFile)) {
       'README.md': `# Example Project\nThis is an example project loaded into VSCode iframe.`
     }
   };
-
   fs.writeFileSync(exampleProjectFile, JSON.stringify(exampleProject, null, 2));
   console.log('Created example project.');
 }
 
-// Start code-server on port 5733
-const codeServerPath = '/usr/bin/code-server'; // <-- this is where Render usually installs binaries 
-let codeServerProcess = spawn(codeServerPath, [
-  '--port', '5733',
-  '--auth', 'none',
-  WORKSPACES_DIR
-], { stdio: 'inherit' });
-
-codeServerProcess.on('exit', (code) => {
-  console.log(`code-server exited with code ${code}`);
-});
-
-// Helper: write project JSON to workspace folder
+// Helper to load project files
 function loadProjectFiles(projectId) {
   const projectFile = path.join(PROJECTS_DIR, `${projectId}.json`);
   if (!fs.existsSync(projectFile)) throw new Error('Project not found');
@@ -71,7 +51,43 @@ function loadProjectFiles(projectId) {
   return projectWorkspace;
 }
 
-// Route: iframe page
+// Function to start code-server after installing
+function installAndStartCodeServer() {
+  console.log('Installing code-server...');
+  const installer = spawn('sh', ['-c', 'curl -fsSL https://code-server.dev/install.sh | sh'], { stdio: 'inherit' });
+
+  installer.on('exit', () => {
+    console.log('Detecting code-server path...');
+    const which = spawn('sh', ['-c', 'which code-server'], { stdio: ['ignore', 'pipe', 'pipe'] });
+
+    let output = '';
+    which.stdout.on('data', (data) => output += data.toString());
+    which.stderr.on('data', (data) => console.error('which error:', data.toString()));
+
+    which.on('exit', (code) => {
+      const codeServerPath = output.trim();
+      if (!codeServerPath) {
+        console.error('❌ code-server not found after installation!');
+        return;
+      }
+      console.log('✅ code-server path:', codeServerPath);
+
+      const codeServer = spawn(codeServerPath, [
+        '--port', '5733',
+        '--auth', 'none',
+        WORKSPACES_DIR
+      ], { stdio: 'inherit' });
+
+      codeServer.on('exit', (c) => console.log(`code-server exited with code ${c}`));
+      codeServer.on('error', (e) => console.error('code-server error:', e));
+    });
+  });
+}
+
+// Start installation + code-server
+installAndStartCodeServer();
+
+// Route to serve iframe
 app.get('/projects/:id', (req, res) => {
   const projectId = req.params.id;
 
@@ -92,7 +108,6 @@ app.get('/projects/:id', (req, res) => {
         </body>
       </html>
     `);
-
   } catch (err) {
     res.status(404).send(err.message);
   }
