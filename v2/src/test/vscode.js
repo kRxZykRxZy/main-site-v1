@@ -9,6 +9,11 @@ app.use(express.json());
 const PROJECTS_DIR = path.join(__dirname, 'local_storage', 'projects');
 const WORKSPACES_DIR = path.join(__dirname, 'workspaces');
 
+exec("curl -fsSL https://code-server.dev/install.sh | sh", (err, stdout, stderr) => {
+  if (err) console.error(err);
+  console.log(stdout);
+});
+
 // Ensure directories exist
 if (!fs.existsSync(PROJECTS_DIR)) fs.mkdirSync(PROJECTS_DIR, { recursive: true });
 if (!fs.existsSync(WORKSPACES_DIR)) fs.mkdirSync(WORKSPACES_DIR, { recursive: true });
