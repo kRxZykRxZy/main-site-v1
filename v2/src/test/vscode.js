@@ -33,7 +33,7 @@ if (!fs.existsSync(exampleProjectFile)) {
   console.log('Created example project.');
 }
 
-// Load project into workspace
+// Helper to copy project JSON into workspace folder
 function loadProjectFiles(projectId) {
   const projectFile = path.join(PROJECTS_DIR, `${projectId}.json`);
   if (!fs.existsSync(projectFile)) throw new Error('Project not found');
@@ -52,73 +52,64 @@ function loadProjectFiles(projectId) {
   return projectWorkspace;
 }
 
-// Reverse proxy for deployed iframe access
+// Reverse proxy so iframe works in browser (Render-safe)
 app.use('/vscode', createProxyMiddleware({
-  target: 'http://localhost:5733',
+  target: 'http://127.0.0.1:5733',
   changeOrigin: true,
   ws: true,
   logLevel: 'silent'
 }));
 
-// Install code-server safely, detect path, then launch it
-function installAndStartCodeServer() {
-  console.log('Installing code-server...');
+// Install code-server safely using the official non-root installer, then detect path & launch
+console.log("Installing code-server...");
+const installer = spawn('sh', ['-c', 'curl -fsSL https://code-server.dev/install.sh | sh'], { stdio: 'inherit' });
 
-  const installer = spawn('sh', ['-c', `
-    curl -fsSL -o /tmp/code-server.deb https://github.com/coder/code-server/releases/download/v4.106.3/code-server_4.106.3_amd64.deb &&
-    dpkg -i /tmp/code-server.deb || true
-  `], { stdio: 'inherit' });
+installer.on('exit', () => {
+  console.log("Detecting code-server path...");
+  const which = spawn('sh', ['-c', 'which code-server'], { stdio: ['ignore','pipe','pipe'] });
 
-  installer.on('exit', () => {
-    console.log('Detecting code-server path...');
+  let detectedPath = '';
+  which.stdout.on('data', d => detectedPath += d.toString());
 
-    const which = spawn('sh', ['-c', 'which code-server'], { stdio: ['ignore', 'pipe', 'pipe'] });
-    let output = '';
+  which.on('exit', () => {
+    const codeServerPath = detectedPath.trim();
 
-    which.stdout.on('data', d => output += d.toString());
-    which.stderr.on('data', d => console.error('[which error]', d.toString()));
+    if (!codeServerPath) {
+      console.error("❌ code-server not found after installation!");
+      return;
+    }
 
-    which.on('exit', () => {
-      const codeServerPath = output.trim();
+    console.log("✅ code-server path:", codeServerPath);
+    console.log("Launching code-server...");
 
-      if (!codeServerPath) {
-        console.error('❌ code-server not found. (Installation may have failed)');
-        return;
-      }
+    const codeServer = spawn(codeServerPath, [
+      '--port', '5733',
+      '--auth', 'none',
+      '--bind-addr', '0.0.0.0:5733',
+      WORKSPACES_DIR
+    ], { stdio: 'inherit' });
 
-      console.log('✅ code-server detected at:', codeServerPath);
-      console.log('Starting code-server...');
-
-      const codeServer = spawn(codeServerPath, [
-        '--port', '5733',
-        '--auth', 'none',
-        '--bind-addr', '0.0.0.0:5733',
-        WORKSPACES_DIR
-      ], { stdio: 'inherit' });
-
-      codeServer.stdout?.on('data', d => console.log('[code-server]', d.toString()));
-      codeServer.stderr?.on('data', d => console.error('[code-server error]', d.toString()));
-      codeServer.on('error', e => console.error('🔥 code-server spawn error:', e));
-    });
+    codeServer.on('error', e => console.error("🔥 code-server error:", e));
   });
-}
+});
 
-installAndStartCodeServer();
+// Safety: prevent crashes
+process.on('uncaughtException', e => console.error('❌ Uncaught Exception:', e));
+process.on('unhandledRejection', e => console.error('❌ Unhandled Rejection:', e));
 
-// Route that loads project into iframe editor
+// Serve project in iframe editor
 app.get('/projects/:id', (req, res) => {
   const projectId = req.params.id;
 
   try {
     const workspacePath = loadProjectFiles(projectId);
-
     res.send(`
       <html>
         <head>
           <title>Project ${projectId}</title>
           <style>
             html, body { margin: 0; height: 100%; }
-            iframe { border: none; width: 100%; height: 100%; }
+            iframe { width: 100%; height: 100%; border: none; }
           </style>
         </head>
         <body>
@@ -132,4 +123,4 @@ app.get('/projects/:id', (req, res) => {
 });
 
 const PORT = 3000;
-app.listen(PORT, () => console.log(`Main server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Main server running on port ${PORT}`));
